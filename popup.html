@@ -1,0 +1,227 @@
+<!doctype HTML>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Moravský Překladač</title>
+		<link rel="stylesheet" href="./data/popup.css">
+		<script src="./data/popup.js" defer></script>
+	</head>
+	<body>
+		<div id="header">
+			<div style="display: flex; flex-direction: column;">
+				<span>Moravský překladač</span>
+				<span id="trBitSlz" style="font-size: 3.2mm;">a částečně slezský</span>
+			</div>
+			<span style="margin-left: 20px;"> pro Web!</span>
+		</div>
+		<div id="pageBasic" class="page">
+			<!-- Zapnout / Vypnout překlad-->
+			<div class="settingItem">
+				<p>
+					<span>Povoleno na této stránce</span>
+				</p>
+
+				<label class="switch">
+					<input type="checkbox" id="settingPageRule" checked>
+					<span class="slider round"></span>
+				</label>
+			</div>
+
+		<!-- +  Refresh translate button-->
+
+			<div class="settingItem">
+				<p id="from" style="display: inline">Z češtiny do</p>
+				<select id="settingCurrentLang" style="margin: 5px;">
+					<option>test</option>
+
+				</select>
+				
+				<div style="display: flex;">
+					<span data-tooltip="Vybrat místo z mapy" style="width: fit-content; height: fit-content;" class="butIc tooltipC" rel="nofollow" id="btnShowMap">
+						<svg class="ib" style="width: 31px; height: 31px" viewBox="0 0 50 75"><path d="m25 75c0 0 25-35 25-50 0-14-12-25-25-25-13 0-25 11-25 25 0 16 25 50 25 50zm0-63m-13 13c0-7 6-13 13-13 8 0 13 7 13 13 0 7-6 13-13 13-7 0-13-6-13-13z"></path></svg>
+					</span>
+				</div>
+			</div>
+				
+			<!-- Další nastavení -->
+			<div class="settingItem">
+				<span id="btmMoreSettings" class="link">Další nastavení</span>
+			</div>
+		</div>
+
+		<!-- Karta mapa -->
+		<div id="pageMap" class="page" style="display: none">
+			<span>Místo z mapy</span>
+			<div id="mapOuter">
+
+			</div>
+			
+			<span class="link goBack" id="btnGoBack">Zpátky</span>
+		</div>
+
+		<!-- More settings -->
+		<div id="pageMoreSettings" class="page" style="display: none">
+			<div id="allSettings">
+				<div style="display: flex; justify-content: space-between; align-items: center">
+					<p style="flex-direction: column">
+						<span id="textTranscription">Transkripce</span>
+					</p>
+					<select id="settingTranscription">
+						<option id="textDefaultText" value="default" style="font-weight: bold">Výchozí fonetická</option>
+						<option id="textCes" value="ipa">IPA (zjednodušené)</option>
+						<option id="textCes" value="czechsimple">Česká zjednodušená</option>
+						<option id="textCes" value="czech">Česká fonetická</option>
+						<option id="textMor" value="moravian">Moravská (Kozohorský)</option>
+						<option id="textMor" value="silezian_slabikorzovy">Slezská spřežková (Slabikářův)</option>
+						<optgroup>
+							<option id="textAzbuka" value="cyrilice">Cyrilice</option>
+							<option id="textHiragana" value="hiragana">Hiragana</option>
+							<option id="textKatakana" value="katakana">Katakana</option>
+							<option id="textHlaholice" value="hlaholice">Hlaholice</option>
+							<option id="textRuny" value="runy">Runy</option>
+						</optgroup>
+					</select>
+				</div>
+
+				<div class="settingItem">
+					<p>
+						<span id="textbetaFunctions">Automatický překlad</span>
+						<span class="moreinfo" id="textbetaFunctionsDetails"></span>
+					</p>
+
+					<label class="switch">
+						<input type="checkbox" id="settingAutoTranslate" checked="">
+						<span class="slider round"></span>
+					</label>
+				</div>
+
+				<div class="settingItem">
+					<p>
+						<span id="textOnlyMoravia">Typ překládání</span>
+						<span class="moreinfo" id="textOnlyMoraviaMore">Země s překlady</span>
+					</p>
+
+					<select id="onlyMoravia">
+						<option id="textDefaultText" value="default" style="font-weight: bold">Výchozí</option>
+						<option id="textMor" value="eit">e.inputText</option>
+						<option id="textMorSl" value="sdr">simpleDimpleReplace</option>
+					</select>
+				</div>
+
+				<hr>
+
+				<div class="settingItem">
+					<p>
+						<span id="textbetaFunctions">Z menu myši</span>
+						<span class="moreinfo" id="textbetaFunctionsDetails">Označený text přeložit</span>
+					</p>
+
+					<label class="switch">
+						<input type="checkbox" id="betaFunctions" checked="">
+						<span class="slider round"></span>
+					</label>
+				</div>
+
+				<div class="settingItem">
+					<p>
+						<span id="textOnlyMoravia">Živě titulky</span>
+						<span class="moreinfo" id="textOnlyMoraviaMore">Zatím pouze Youtube</span>
+					</p>
+
+					<label class="switch">
+						<input type="checkbox" id="betaFunctions" checked="">
+						<span class="slider round"></span>
+					</label>
+				</div>
+
+				<hr>
+
+				<div class="settingItem">
+					<p>
+						<span id="textbetaFunctions">Všechny překlady</span>
+						<span class="moreinfo" id="textbetaFunctionsDetails">I ty s málo dat</span>
+					</p>
+
+					<label class="switch">
+						<input type="checkbox" id="settingAlltranslation" checked="">
+						<span class="slider round"></span>
+					</label>
+				</div>
+				<div class="settingItem">
+					<p>
+						<span id="textOnlyMoravia">Oblast</span>
+						<span class="moreinfo" id="textOnlyMoraviaMore">Země s překlady</span>
+					</p>
+
+					<select id="settingAreas">
+						<option id="textDefaultText" value="default" style="font-weight: bold">Výchozí</option>
+						<option id="textMorSl" value="mor+sl">Morava + Slezsko v ČR</option>
+						<option id="textMor" value="mor">Morava</option>
+						<option id="textMorE" value="mor+e">Morava + enkl.</option>
+						<option id="textAll" value="all">Vše</option>
+					</select>
+				</div>
+
+			
+				<hr>
+
+				<div class="settingItem">
+					<p>
+						<span id="textOnlyMoravia">Barva</span>
+						<span class="moreinfo" id="textOnlyMoraviaMore"></span>
+					</p>
+
+					<div class="slidecontainer">
+						<input type="range" min="0" max="360" value="50" class="colorSlider" id="settingColor">
+					</div>
+				</div>
+
+				<div class="settingItem">
+					<p>
+						<span id="textOnlyMoravia">Režim</span>
+						<span class="moreinfo" id="textOnlyMoraviaMore"></span>
+					</p>
+
+					<select id="settingTheme">
+						<option id="textDefaultTheme" style="font-weight: bold" value="default">Výchozí</option>
+						<option id="textLight" value="light">Světlý</option>
+						<option id="textSemi" value="semi">Semi</option>
+						<option id="textDark" value="dark">Tmavý</option>
+					</select>
+				</div>
+
+				<div class="settingItem">
+					<p>
+						<span id="textOnlyMoravia">Jazyk</span>
+						<span class="moreinfo" id="textOnlyMoraviaMore">Language</span>
+					</p>
+
+					<select id="settingSystemLang">
+						<option id="textDefault" style="font-weight: bold" value="default">Výchozí</option>
+						<option value="cs">Čeština</option>
+						<option value="en">English</option>
+						<option value="sk">Slovenčina</option>
+						<option value="pl">Polski</option>
+						<option value="de">Deutsch</option>
+						<option value="jp">日本語</option>
+						<option value="hanak">Hanácke</option>
+						<option value="valach">Valašsky</option>
+						<option value="mor_radikalni">Moravsky</option>
+					</select>
+				</div>
+
+				<hr>
+
+				<div class="settingItem">
+					<p>
+						<span id="textOnlyMoravia">O překladači</span>
+					</p>
+					
+					<a class="button" href="https://github.com/GeftGames/moravskyprekladac.web">Zobrazit</a>
+				</div>
+			</div>
+
+			<span class="link goBack" id="btnGoBack2">Zpátky</span>
+		</div>
+	</body>
+</html>
