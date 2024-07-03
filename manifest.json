@@ -25,8 +25,11 @@
     },
     {
       "resources": [
-        "style/extension.css",
-        "data/popup.js"
+        "data/popup.css",
+        "engine/map.js",
+        "data/popup.js",
+        "engine/v3.trw_a",
+        "../data/images/map.svg"
       ],
       "matches": [
         "https://example.com/*"
@@ -49,5 +52,14 @@
 
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
-  }
+  },
+
+  "permissions": [
+    "activeTab", 
+    "tabs", 
+    "contextMenus",
+    "scripting",
+    "storage",
+    "unlimitedStorage"
+  ]
 }

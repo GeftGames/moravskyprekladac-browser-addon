@@ -5,6 +5,7 @@
 		<title>Moravský Překladač</title>
 		<link rel="stylesheet" href="./data/popup.css">
 		<script src="./data/popup.js" defer></script>
+		<script src="./engine/map.js" defer></script>
 	</head>
 	<body>
 		<div id="header">
@@ -14,7 +15,14 @@
 			</div>
 			<span style="margin-left: 20px;"> pro Web!</span>
 		</div>
-		<div id="pageBasic" class="page">
+
+		<!-- Loading -->
+		<div id="pageLoading" class="page">
+			<div id="loadingBar"><div id="progness"></div></div>
+            <span id="textDownloadingList">Inicializace...</span>
+		</div>
+
+		<div id="pageBasic" class="page" style="display: none">
 			<!-- Zapnout / Vypnout překlad-->
 			<div class="settingItem">
 				<p>
@@ -27,14 +35,13 @@
 				</label>
 			</div>
 
-		<!-- +  Refresh translate button-->
+		
+
+			<!-- +  Refresh translate button-->
 
 			<div class="settingItem">
 				<p id="from" style="display: inline">Z češtiny do</p>
-				<select id="settingCurrentLang" style="margin: 5px;">
-					<option>test</option>
-
-				</select>
+				<select id="settingCurrentLang" style="margin: 5px; text-align: left;"></select>
 				
 				<div style="display: flex;">
 					<span data-tooltip="Vybrat místo z mapy" style="width: fit-content; height: fit-content;" class="butIc tooltipC" rel="nofollow" id="btnShowMap">
@@ -51,17 +58,35 @@
 
 		<!-- Karta mapa -->
 		<div id="pageMap" class="page" style="display: none">
-			<span>Místo z mapy</span>
-			<div id="mapOuter">
-
+			<span style="margin: 3px;display: block;">Vyberte místo z mapy</span>
+			<div id="mapSelector" style="width: 100%; overflow: hidden;left: 0px;height: 5cm;display: block;">
+				<div id="map" style="display: flex;transform-origin: left 0px; height: 100%;">
+					<div id="mapZoom" style="width: 100%;height: 100%;">
+						<canvas id="mapSelectLang" style="width: 100%;height: 100%;"></canvas>
+					</div>
+				</div>
 			</div>
 			
-			<span class="link goBack" id="btnGoBack">Zpátky</span>
+			<span class="link goBack" id="btnGoBack" style="margin-top: 4px;">Zpátky</span>
 		</div>
 
 		<!-- More settings -->
 		<div id="pageMoreSettings" class="page" style="display: none">
 			<div id="allSettings">
+				<div class="settingItem">
+					<p>
+						<span id="textbetaFunctions">Zapnuto</span>
+						<span class="moreinfo" id="textbetaFunctionsDetails"></span>
+					</p>
+
+					<label class="switch">
+						<input type="checkbox" id="settingActive" checked>
+						<span class="slider round"></span>
+					</label>
+				</div>
+
+				<hr>
+
 				<div style="display: flex; justify-content: space-between; align-items: center">
 					<p style="flex-direction: column">
 						<span id="textTranscription">Transkripce</span>
@@ -90,7 +115,7 @@
 					</p>
 
 					<label class="switch">
-						<input type="checkbox" id="settingAutoTranslate" checked="">
+						<input type="checkbox" id="settingAutoTranslate" checked>
 						<span class="slider round"></span>
 					</label>
 				</div>
@@ -117,7 +142,7 @@
 					</p>
 
 					<label class="switch">
-						<input type="checkbox" id="betaFunctions" checked="">
+						<input type="checkbox" id="settingsMouseContex" checked>
 						<span class="slider round"></span>
 					</label>
 				</div>
@@ -129,7 +154,7 @@
 					</p>
 
 					<label class="switch">
-						<input type="checkbox" id="betaFunctions" checked="">
+						<input type="checkbox" id="settingsLiveSubs" checked>
 						<span class="slider round"></span>
 					</label>
 				</div>
@@ -143,7 +168,7 @@
 					</p>
 
 					<label class="switch">
-						<input type="checkbox" id="settingAlltranslation" checked="">
+						<input type="checkbox" id="settingAlltranslation" checked>
 						<span class="slider round"></span>
 					</label>
 				</div>
@@ -217,7 +242,7 @@
 						<span id="textOnlyMoravia">O překladači</span>
 					</p>
 					
-					<a class="button" href="https://github.com/GeftGames/moravskyprekladac.web">Zobrazit</a>
+					<a class="button" target="_blank" href="https://github.com/GeftGames/moravskyprekladac.web">Zobrazit</a>
 				</div>
 			</div>
 
