@@ -9,7 +9,7 @@
 3, *Načíst rozbalené* a vyhledat staženou složku doplňku
 
 ## Poznámky
-- Licence
+- [Licence](https://github.com/GeftGames/moravskyprekladac.web/blob/main/LICENSE)
 - Tento doplněk používá součásti [Moravského překladače](https://github.com/GeftGames/moravskyprekladac)
 
 # moravskyprekladac.web
