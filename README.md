@@ -6,7 +6,12 @@
 ### Manuálně nainstalovat
 1. Otevřít *chrome://extensions*
 2. Povolit *Režim pro vývojáře*
-3, *Načíst rozbalené* a vyhledat staženou složku doplňku
+3. *Načíst rozbalené* a vyhledat staženou složku doplňku
+
+## Popis
+- Doplněk do prohlížeče přeloží webovou stránku do nářečí (nebo jiného typu překladu)
+- umí přeložit označený text
+- živě překládat titulky na Youtube
 
 ## Poznámky
 - [Licence](https://github.com/GeftGames/moravskyprekladac.web/blob/main/LICENSE)
