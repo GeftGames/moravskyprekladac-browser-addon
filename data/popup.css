@@ -296,3 +296,57 @@ select option:hover {
     box-shadow: 0 1px 1px rgb(var(--colorForward), .3) inset;
     text-shadow: .7px .7px 2px rgb(var(--colorForward), .3);
 }
+
+#loadingBar {
+    width: 100px;
+    height: 20px;
+    background-color: var(--colorEnabled);
+    border-radius: 3px;
+    box-shadow: var(--shadowText);
+}
+
+#progness {
+    height: 20px;
+    background-color: var(--colorEnabledBack);
+    transition: width .05s;
+    border-radius: inherit;
+}
+#pageLoading{
+    height: 4cm;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* img button */
+.ib {
+    height: 24px;
+    width: 24px;
+    color: var(--colorText);
+    opacity: 1;
+    fill: currentColor;
+    overflow: hidden;
+    transition: opacity 0.15s, filter 0.15s;
+    filter: var(--filterShadow1);
+}
+
+.butIc {
+    cursor: pointer;
+    transition: background-color .1s;
+    border: 0px;
+    background-color: transparent;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    margin: 2px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    border-radius: 50%;
+    outline: none;
+}
+
+.butIc:hover {
+    background-color: rgba(var(--colorForward), .25);
+}
