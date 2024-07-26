@@ -26,37 +26,6 @@ class ItemSentence {
         if (item.output == null) return null;
         return item;
     }
-
-    GetDicForm(name) {
-        let p = document.createElement("p");
-
-        // from
-        let f = document.createElement("span");
-        f.innerText = this.input;
-        p.appendChild(f);
-
-        // arrow
-        let e = document.createElement("span");
-        e.innerText = " → ";
-        p.appendChild(e);
-
-        // ro
-        for (let to of this.output) {
-            let t = document.createElement("span");
-            t.innerText = to.Text;
-            t.addEventListener("click", () => {
-                ShowPageLangD(t.GetTable());
-            });
-            t.class = "dicCustom";
-            p.appendChild(t);
-            
-            // cites
-            GenerateSupCite(to.Source).forEach(e => p.appendChild(e));                
-
-        }
-
-        return { from: this.input, to: this.output, name: name, element: p };
-    }
 }
 
 class ItemSentencePart {
@@ -75,34 +44,6 @@ class ItemSentencePart {
         item.show = raw[1] == "1";
         item.output = FastLoadTranslateTo(raw, 2);
         if (item.output!=null) return item;
-    }
-
-    GetDicForm(name) {
-        if (!this.show) return null;
-
-        let p = document.createElement("p");
-        let f = document.createElement("span");
-        f.innerText = this.input;
-        p.appendChild(f);
-
-        let e = document.createElement("span");
-        e.innerText = " → ";
-        p.appendChild(e);
-
-        for (let to of this.output) {
-            let t = document.createElement("span");
-            t.innerText = ApplyPostRules(to.Text);
-            t.addEventListener("click", () => {
-                ShowPageLangD(t.GetTable());
-            });
-            t.class = "dicCustom";
-            p.appendChild(t);
-            
-            // cites
-            GenerateSupCite(to.Source).forEach(e => p.appendChild(e));      
-        }
-
-        return { from: this.input, to: this.output, name: "", element: p };
     }
 }
 
@@ -212,77 +153,9 @@ class ItemPatternNoun {
         }
         return undefined;
     }
-
-    GetTable(starting) {
-        let combineWord = function(arr) {
-            if (!Array.isArray(arr))arr=[arr];
-            let o=[];
-            for (let a of arr) {
-                if (a=="-")return a;
-                if (a!="?") o.push(ApplyPostRules(starting+a));
-            }
-            if (o.length==0) return "?";
-            return o.join(", ");
-        }
-
-        let table = document.createElement("table");
-        table.className = "tableDic";
-        let caption = document.createElement("caption");
-        caption.innerText = "Podstatné jméno";
-        table.appendChild(caption);
-
-        let tbody = document.createElement("tbody");
-        //	tbody.appendChild(document.createTextNode("Podstatné jméno"));
-
-        {
-            let trh = document.createElement("tr");
-            let tdph = document.createElement("td");
-            tdph.innerText = "pád";
-            tdph.style.fontWeight = "bold";
-            trh.appendChild(tdph);
-
-            let tdnh = document.createElement("td");
-            tdnh.innerText = "jednotné";
-            tdnh.style.fontWeight = "bold";
-            trh.appendChild(tdnh);
-
-            let tdmh = document.createElement("td");
-            tdmh.innerText = "množné";
-            tdmh.style.fontWeight = "bold";
-            trh.appendChild(tdmh);
-
-            tbody.appendChild(trh);
-        }
-
-        for (let c = 0; c < 7; c++) {
-            let tr = document.createElement("tr");
-
-            let tdp = document.createElement("td");
-            tdp.innerText = (c + 1) + ".";
-            tr.appendChild(tdp);
-
-            let td1 = document.createElement("td");
-            let os = combineWord(this.Shapes[c]);
-            td1.innerText = ApplyPostRules(os);
-            tr.appendChild(td1);
-
-            let td2 = document.createElement("td");
-            let op = combineWord(this.Shapes[c + 7]);
-            td2.innerText = ApplyPostRules(op);            
-            tr.appendChild(td2);
-
-            tbody.appendChild(tr);
-        }
-        table.appendChild(tbody);
-
-        return table;
-    }
 }
 
 class ItemNoun {
-    //static pattensFrom;
-    //static pattensTo;
-
     constructor() {
         this.UppercaseType = -1;
 
@@ -292,100 +165,27 @@ class ItemNoun {
     }
 
     static Load(data) {
-      /*  if (loadedversion == "TW v0.1") {
-            if (data.includes('?')) return null;
-            let raw = data.split('|');
+        let raw = data.split('|');
 
-            if (raw.length == 4) {
-                let item = new ItemNoun();
-                item.From = raw[0];
-                //item.To = raw[1];
+        let item = new ItemNoun();
+        item.From = raw[0];
 
-                let paternFrom = this.GetPatternByNameFrom(raw[2]);
-                if (paternFrom == null) return null;
-                else item.PatternFrom = paternFrom;
-
-                let paternTo = this.GetPatternByNameTo(raw[3]);
-                if (paternTo == null) return null;
-                else item.To = [{ Body: raw[1], Pattern: paternTo }];
-                //item.To.push([raw[1], paternTo]);
-
-                return item;
-            } else if (raw.length == 3) {
-                let item = new ItemNoun();
-                item.From = raw[0];
-                //item.To = raw[0];
-
-                let paternFrom = this.GetPatternByNameFrom(raw[1]);
-                if (paternFrom == null) return null;
-                else item.PatternFrom = paternFrom;
-
-                let paternTo = this.GetPatternByNameTo(raw[2]);
-                if (paternTo == null) return null;
-                else item.To = [{ Body: raw[0], Pattern: paternTo }];
-                //item.To.push([raw[0], paternTo]);
-
-                return item;
-            } else if (raw.length == 2) {
-                let item = new ItemNoun();
-                item.From = "";
-                //item.To = "";
-
-                let paternFrom = this.GetPatternByNameFrom(raw[0]);
-                if (paternFrom == null) return null;
-                else item.PatternFrom = paternFrom;
-
-                let paternTo = this.GetPatternByNameTo(raw[1]);
-                if (paternTo == null) return null;
-                else item.To = [{ Body: "", Pattern: paternTo }];
-                //item.To.push(["", paternTo]);
-
-                return item;
-            }
+        let paternFrom = this.GetPatternByNameFrom(raw[1]);
+        if (paternFrom == null) {
+            if (dev) console.log("Cannot load pattern '" + raw[1] + "'");
             return null;
-        } else if (loadedversion == "TW v1.0") {
-            if (data.includes('?')) return null;
-            let raw = data.split('|');
+        }
+        item.PatternFrom = paternFrom;
+        item.UppercaseType = parseInt(raw[2]);
 
-            let item = new ItemNoun();
-            item.From = raw[0];
-
-            let paternFrom = this.GetPatternByNameFrom(raw[1]);
-            if (paternFrom == null) return null;
-            else item.PatternFrom = paternFrom;
-
-            item.UppercaseType = parseInt(raw[2]);
-
-            item.To = [];
-            for (let i = 3; i < raw.length; i++) {
-                let paternTo = this.GetPatternByNameTo(raw[i + 1]);
-                if (paternTo != null) item.To.push({ Body: raw[i], Pattern: paternTo });
-            }
-            if (item.To.length > 0) return item;
+        let to = FastLoadTranslateToWithPattern(raw, 3, this);
+        if (to == null) {
+            if (dev) console.log("Cannot load to '" + data + "'");
             return null;
-        } else if (loadedVersionNumber == 2) {*/
-            let raw = data.split('|');
+        }
+        item.To = to;
 
-            let item = new ItemNoun();
-            item.From = raw[0];
-
-            let paternFrom = this.GetPatternByNameFrom(raw[1]);
-            if (paternFrom == null) {
-                if (dev) console.log("Cannot load pattern '" + raw[1] + "'");
-                return null;
-            }
-            item.PatternFrom = paternFrom;
-            item.UppercaseType = parseInt(raw[2]);
-
-            let to = FastLoadTranslateToWithPattern(raw, 3, this);
-            if (to == null) {
-                if (dev) console.log("Cannot load to '" + data + "'");
-                return null;
-            }
-            item.To = to;
-
-            return item;
-      //  }
+        return item;
     }
 
     static GetPatternByNameFrom(name) {
@@ -440,155 +240,6 @@ class ItemNoun {
         if (dev) console.log("⚠️ function 'GetWordTo' has unknown parameter 'number' with value '" + number + "'");
         return [this.From + this.PatternFrom.Shapes[fall - 1], this.PatternFrom.Gender];
     }
-
-    GetDicForm() {
-         /*let body = to.Body,
-            pattern = to.Pattern;
-        if (typeof(pattern) == "undefined") return null;
-
-        let str_form = undefined,
-            str_to = undefined;
-       
-        1.  1  2
-        2.  5  10
-        3.  12 9
-        4.  3  4
-        5.  13 14
-        6.  11 8
-        7.  7  6
-		
-       
-        let try_shapes = [0, 7, 4, 11, 1, 13, 6, 12, 9];
-        let used_fall;
-        for (let i = 0; i < try_shapes.length; i++) {
-            let index = try_shapes[i];
-            used_fall = index;
-            str_form = this.PatternFrom.GetShape(this.From, index);
-            str_to = pattern.GetShapeTr(body, index);
-            //str_to=body+pattern.Shapes[index];
-            if (str_form != undefined && str_to != undefined) break;
-        }
-        if (str_form == undefined || str_to == undefined) return null; */
-        //if (str_to == "") console.log(str_form);
-        /*
-        if (pattern.Shapes[0]!="?") {
-        	str_form=this.PatternFrom.GetShape(this.From,0);
-        	str_to=body+pattern.Shapes[0];
-        } else if (pattern.Shapes[7]!="?") {
-        	str_form=this.PatternFrom.GetShape(this.From,7);
-        	str_to=body+pattern.Shapes[7];
-        } else return null;*/
-
-        let str_form=this.PatternFrom.GetShape(this.From,0);
-        
-        // Create p snap
-        let p = document.createElement("p");
-        
-        // From
-        let f = document.createElement("span");
-        if (this.UppercaseType == 1) f.innerText = str_form.toUpperCase();
-        else if (this.UppercaseType == 2) f.innerText = str_form[0].toUpperCase() + str_form.substring(1);
-        else f.innerText = str_form;
-        p.appendChild(f);
-
-        // arrow
-        let e = document.createElement("span");
-        e.innerText = " → ";
-        p.appendChild(e);
-        let mapper_from;
-
-        // to
-        let listTo=[];
-        if (this.To.length==0) return null;
-        for (let to of this.To) { 
-            let body = to.Body,
-                pattern = to.Pattern,
-                str_to=undefined;
-
-            // find to
-            let try_shapes = [0, 7, 3, 10, 1, 13, 6, 12, 9, 8, 5, 2, 4, 11];
-            let used_fall;
-
-            for (let i = 0; i < try_shapes.length; i++) {
-                str_to = pattern.GetShapeTr(body, used_fall = try_shapes[i]);
-                mapper_from=this.PatternFrom.GetShapeFirst(this.From, try_shapes[i]);
-                // Uppercase
-                if (str_to!=undefined){                
-                    if (this.UppercaseType == 1) str_to = str_to.toUpperCase();
-                    else if (this.UppercaseType == 2) str_to = str_to[0].toUpperCase() + str_to.substring(1);
-                    else str_to = str_to;
-                }
-
-                if (str_to != undefined) break;
-            }            
-            if (str_to == undefined) continue;
-
-            // text
-            let t = document.createElement("span");
-            t.innerText = ApplyPostRules(str_to);
-            t.addEventListener("click", () => {
-                ShowPageLangD(pattern.GetTable(body));
-            });
-            t.className = "dicCustom";
-            p.appendChild(t);
-            
-            // cites
-            GenerateSupCite(to.Source).forEach(e => p.appendChild(e));
-            //console.log(to);                
-
-            let space = document.createTextNode("  ");
-            p.appendChild(space);
-
-            // comment
-            if (to.Comment != undefined) {
-                if (to.Comment != "") {
-                    let c = document.createElement("span");
-                    c.innerText = to.Comment;
-                    c.className = "dicMeaning";
-                    p.appendChild(c);
-                }
-            }
-       
-            let r = document.createElement("span");
-            let info = " (podst.";
-            if (pattern.Gender == "zen") info += ", rod žen.";
-            else if (pattern.Gender == "str") info += ", rod stř.";
-            else if (pattern.Gender == "muz ziv") info += ", rod muž. ž.";
-            else if (pattern.Gender == "muz neziv") info += ", rod muž. n.";
-
-            if (used_fall != 0) {
-                if (used_fall < 7) info += ", č. j., pád " + (used_fall + 1) + ".";
-                else info += ", č. m., pád " + (used_fall - 7 + 1) + ".";
-            }
-
-            r.innerText = info + ")";
-            r.className = "dicMoreInfo";
-            p.appendChild(r);
-                
-           if (mapper_from!=undefined)p.appendChild(mapper_link("<{word="+mapper_from+"|typ=pods|cislo="+(used_fall<7 ? "j" : "m")+"|pad="+(used_fall%7+1)+"}>", str_to));
-        }
-
-        return { from: str_form, to: listTo, name: "", element: p };
-    }
-
-    /*GetWordTo(number, fall, gender) {
-    	console.log(number, fall, gender);
-    	if (gender != this.PatternTo.Gender) return null;
-    	if (fall==-1) return null;
-    	console.log(number, fall, gender);
-    	if (number==1) {
-    		return [this.To+this.PatternTo.Shapes[fall-1], this.PatternTo.Gender];
-    	}
-    	if (number==2) {
-    		return [this.To+this.PatternTo.Shapes[fall+6], this.PatternTo.Gender];
-    	}
-    	if (number==-1) {
-    		return [[this.To+this.PatternTo.Shapes[fall-1], this.PatternTo.Gender],[this.To+this.PatternTo.Shapes[fall+6], this.PatternTo.Gender]];
-    	}
-    	
-    	console.log("function 'GetWordTo' has unknown parameter 'number' with value '"+number+"'");
-    	return [this.To+this.PatternTo.Shapes[fall-1], this.PatternTo.Gender];
-    }*/
 
     IsStringThisWord(str) {
         if (this.To === undefined) return null;
@@ -762,123 +413,20 @@ class ItemSimpleWord {
 
     static Load(data) {
         let raw = data.split('|');
-       /* if (loadedversion == "TW v0.1" || loadedversion == "TW v1.0") {
-            if (raw[0] == '') return null;
-            if (raw.length == 1) {
-                if (raw[0] == '') return null;
-                if (raw[0].includes('?')) return null;
-                let item = new ItemSimpleWord();
-                if (raw[0].includes(',')) item.input = raw[0].split(',');
-                else item.input = raw[0];
 
-                item.output = [{ Text: raw[0] }];
-                return item;
-            }
-            if (raw.length == 2) {
-                if (raw[0] == '') return null;
-                if (raw[1] == '') return null;
-                if (raw[0].includes('?')) return null;
-                if (raw[1].includes('?')) return null;
+        if (raw[0] == '') return null;
+        let item = new ItemSimpleWord();
 
-                let item = new ItemSimpleWord();
+        // z
+        if (raw[0].includes(',')) item.input = raw[0].split(',');
+        else item.input = raw[0];
 
-                if (raw[0].includes(',')) item.input = raw[0].split(',');
-                else item.input = raw[0];
+        item.show = raw[1] == "1";
 
-                if (raw[1].includes(',')) item.output = [{ Text: raw[1].split(',') }];
-                else item.output = [{ Text: raw[1] }];
-                return item;
-            }
-        } else if (loadedVersionNumber == 2) {*/
-            if (raw[0] == '') return null;
-            let item = new ItemSimpleWord();
-
-            // z
-            if (raw[0].includes(',')) item.input = raw[0].split(',');
-            else item.input = raw[0];
-
-            item.show = raw[1] == "1";
-
-            // na
-            item.output = FastLoadTranslateTo(raw, 2);
-            if (item.output == null) return null;
-            return item;
-        //}
-        //return null;
-    }
-
-    GetDicForm(name) {
-        //	if (Array.isArray(this.output)) {
-        let p = document.createElement("p");
-        let f = document.createElement("span");
-        if (Array.isArray(this.input)) {
-            f.innerText = this.input.join(", ");
-        } else f.innerText = this.input;
-        
-       // f.classList="slink";
-       
-        p.appendChild(f);
-
-        let e = document.createElement("span");
-        e.innerText = " → ";
-        p.appendChild(e);
-
-        //console.log(this);
-        let out = [];
-        //if (Array.isArray(this.output)) {
-        for (let i = 0; i < this.output.length; i++) {
-            let to = this.output[i];
-            let o = ApplyPostRules(to.Text);
-
-            out.push(o);
-            if (o == "") return null;
-
-            let t = document.createElement("span");
-            t.innerText = o;
-            p.appendChild(t);
-            
-            // cites
-            GenerateSupCite(to.Source).forEach(e => p.appendChild(e));   
-
-            if (to.Comment != undefined) {
-                if (to.Comment != "") {
-                    let c = document.createElement("span");
-                    c.innerText = to.Comment;
-                    c.className = "dicMeaning";
-                    p.appendChild(c);
-                }
-            }
-
-            if (i != this.output.length - 1) {
-                let space = document.createTextNode(", ");
-                p.appendChild(space);
-            }
-        } 
-        /*f.addEventListener("click", function(){
-            mapper_open(f.innerText, out);
-        });*/
-        /*	} else {
-			let o=this.output;
-			out = o.Text;
-			if (out=="") return null;
-
-			let t = document.createElement("span");
-			t.innerText=o.Text;
-			p.appendChild(t);		
-		}			
-		
-		p.appendChild(document.createTextNode(" "));
-*/
-        if (name != "") {
-            let r = document.createElement("span");
-            r.innerText = " (" + name + ")";
-            r.className = "dicMoreInfo";
-            p.appendChild(r);
-        }
-
-        p.appendChild(mapper_link(f.innerText, out));
-
-        return { from: Array.isArray(this.input) ? this.input[0] : this.input, to: out.join(", "), name: "", element: p };
+        // na
+        item.output = FastLoadTranslateTo(raw, 2);
+        if (item.output == null) return null;
+        return item;
     }
 }
 
@@ -889,129 +437,20 @@ class ItemAdverb {
 
     static Load(data) {
         let raw = data.split('|');
-        /*if (loadedversion == "TW v0.1" || loadedversion == "TW v1.0") {
-            if (raw[0] == '') return null;
-            if (raw.length == 1) {
-                if (raw[0] == '') return null;
-                if (raw[0].includes('?')) return null;
-                let item = new ItemAdverb();
-                if (raw[0].includes(',')) item.input = raw[0].split(',');
-                else item.input = raw[0];
 
-                item.output = [{ Text: raw[0] }];
-                return item;
-            }
-            if (raw.length == 2) {
-                if (raw[0] == '') return null;
-                if (raw[1] == '') return null;
-                if (raw[0].includes('?')) return null;
-                if (raw[1].includes('?')) return null;
+        if (raw[0] == '') return null;
+        let item = new ItemAdverb();
 
-                let item = new ItemAdverb();
+        // z
+        if (raw[0].includes(',')) item.input = raw[0].split(',');
+        else item.input = raw[0];
 
-                if (raw[0].includes(',')) item.input = raw[0].split(',');
-                else item.input = raw[0];
+        //item.show=raw[1]=="1";
 
-                if (raw[1].includes(',')) item.output = [{ Text: raw[1].split(',') }];
-                else item.output = [{ Text: raw[1] }];
-                return item;
-            }
-        } else if (loadedVersionNumber == 2) {*/
-            if (raw[0] == '') return null;
-            let item = new ItemAdverb();
-
-            // z
-            if (raw[0].includes(',')) item.input = raw[0].split(',');
-            else item.input = raw[0];
-
-            //item.show=raw[1]=="1";
-
-            // na
-            item.output = FastLoadTranslateTo(raw, 1);
-            if (item.output == null) return null;
-            return item;
-        //}
-        //return null;
-    }
-
-    GetDicForm(name) {
-        let p = document.createElement("p");
-       
-        let arr_inp=this.input;
-        if (!Array.isArray(this.input)) arr_inp=[this.input];
-
-        for (let i = 0; i < arr_inp.length; i++) {
-            let ri = arr_inp[i];
-            let f = document.createElement("span"); 
-            f.innerText=ri;
-          //  f.classList="slink";
-      
-            p.appendChild(f);
-
-            // Do not place comma
-            if (i != arr_inp.length-1) p.appendChild(document.createTextNode(", "));
-        }
-       
-
-        let e = document.createElement("span");
-        e.innerText = " → ";
-        p.appendChild(e);
-
-        //console.log(this);
-        let out = [];
-        //if (Array.isArray(this.output)) {
-        for (let i = 0; i < this.output.length; i++) {
-            let to = this.output[i];
-            let o = ApplyPostRules(to.Text);
-
-            out.push(o);
-            if (o == "") return null;
-
-            let t = document.createElement("span");
-            t.innerText = o;
-            p.appendChild(t);
-                        
-            // cites
-            GenerateSupCite(to.Source).forEach(e => p.appendChild(e));   
-
-            if (to.Comment != undefined) {
-                if (to.Comment != "") {
-                    let c = document.createElement("span");
-                    c.innerText = to.Comment;
-                    c.className = "dicMeaning";
-                    p.appendChild(c);
-                }
-            }
-
-            if (i != this.output.length - 1) {
-                let space = document.createTextNode(", ");
-                p.appendChild(space);
-            }
-        }      
-
-        
-        /*	} else {
-			let o=this.output;
-			out = o.Text;
-			if (out=="") return null;
-
-			let t = document.createElement("span");
-			t.innerText=o.Text;
-			p.appendChild(t);		
-		}			
-			
-		
-		p.appendChild(document.createTextNode(" "));
-*/
-        if (name != "") {
-            let r = document.createElement("span");
-            r.innerText = " (" + name + ")";
-            r.className = "dicMoreInfo";
-            p.appendChild(r);
-        }
-        p.appendChild(mapper_link(arr_inp[0], out));
-
-        return { from: Array.isArray(this.input) ? this.input[0] : this.input, to: out.join(", "), name: "", element: p };
+        // na
+        item.output = FastLoadTranslateTo(raw, 1);
+        if (item.output == null) return null;
+        return item;
     }
 }
 
@@ -1023,46 +462,14 @@ class ItemPhrase {
 
     static Load(data) {
         let raw = data.split('|');
-        /*if (loadedversion == "TW v0.1" || loadedversion == "TW v1.0") {
-            if (raw[0] == '') return null;
-            if (raw.length == 1) {
-                let item = new ItemPhrase();
-                item.input = this.DoubleSplitInp(data);
-                item.output = this.DoubleSplit(data);
-                return item;
-            }
-            if (raw.length == 2) {
-                let item = new ItemPhrase();
-                item.input = this.DoubleSplitInp(raw[0]);
-                item.output = this.DoubleSplit(raw[1]);
-                return item;
-            }
-        } else if (loadedversion == "TW v1.0") {
-            if (raw[0] == '') return null;
-            if (raw.length == 2) {
-                let item = new ItemPhrase();
-                item.input = this.DoubleSplitInp(raw[0]);
-                item.output = this.DoubleSplit(raw[1]);
-                return item;
-            }
-            if (raw.length == 3) {
-                let item = new ItemPhrase();
-                item.input = this.DoubleSplitInp(raw[0]);
-                item.output = this.DoubleSplit(raw[1]);
-                item.Comment = raw[2];
-                return item;
-            }
-        } else if (loadedVersionNumber == 2) {*/
-            if (raw[0] == '') return null;
-            let item = new ItemPhrase();
-            item.input = this.DoubleSplitInp(raw[0]);
-            item.show = raw[0] == "1";
-            item.output = this.FastLoadTranslateTo(raw, 2);
-            if (item.output == null) return null;
-            return item;
-        //}
-
-        //return null;
+     
+        if (raw[0] == '') return null;
+        let item = new ItemPhrase();
+        item.input = this.DoubleSplitInp(raw[0]);
+        item.show = raw[0] == "1";
+        item.output = this.FastLoadTranslateTo(raw, 2);
+        if (item.output == null) return null;
+        return item;
     }
 
     static DoubleSplit(str) {
@@ -1147,50 +554,7 @@ class ItemPhrase {
         // for example [["true", "He"], [false, " "], [true, "is"], [false, " "], [true, "guy"], [false, "!"]]
         return arr;
     }
-
-    GetDicForm() {
-        let inp = "";
-        let out = "";
-
-        //console.log(this.output);
-        for (let o of this.output) {
-            //console.log(o.Text);
-            out += o.Text.join(" ");
-            //for (let o2 of o) o2+" ";
-        }
-
-        if (Array.isArray(this.input)) {
-
-            for (let i of this.input) {
-                // for (let i of mul_i) {
-                inp += i.join(" ");
-                // }
-                // inp += ", ";
-                //for (let i2 of i) inp+=i2+" ";
-            }
-        } else inp = this.input;
-
-        let p = document.createElement("p");
-        let f = document.createElement("span");
-        f.innerText = inp;
-        p.appendChild(f);
-
-        let e = document.createElement("span");
-        e.innerText = " → ";
-        p.appendChild(e);
-
-        let t = document.createElement("span");
-        t.innerText = ApplyPostRules(out);
-        p.appendChild(t);
-
-        t.addEventListener("click", () => {
-            ShowPageLangD(t.GetTable());
-        });
-        t.class = "dicCustom";
-
-        return { from: inp, to: out, name: "fráze", element: p };
-    }
-
+  
     static FastLoadTranslateTo(rawData, indexStart) {
         let ret = [];
         for (let i = indexStart; i < rawData.length; i += 2) {
@@ -1317,63 +681,6 @@ class ItemPreposition {
             if (this.input != "?") return [this.output, this.fall];
         }
         return null;
-    }
-
-    GetDicForm(name) {
-        let p = document.createElement("p");
-        for (let ri of this.input){
-            let f = document.createElement("span");
-
-            f.innerText = ri;
-            
-            p.appendChild(f);
-
-            if (ri!=this.input[this.input.length-1])p.appendChild(document.createTextNode(", "));
-        }
-
-        let e = document.createElement("span");
-        e.innerText = " → ";
-        p.appendChild(e);
-
-        //for (const to of this.output) {
-        let out=[];
-        for (let i = 0; i < this.output.length; i++) {
-            let to = this.output[i];
-            let t = document.createElement("span");
-
-            let text_to=ApplyPostRules(to.Text);
-            t.innerText = text_to;
-            out.push(text_to)
-            p.appendChild(t);
-            
-            // cites
-            GenerateSupCite(to.Source).forEach(e => p.appendChild(e));                
-
-
-            if (to.Comment != undefined) {
-                if (to.Comment != "") {
-                    let t = document.createElement("span");
-                    t.innerText = to.Comment;
-                    t.className = "dicMeaning";
-                    p.appendChild(t);
-                }
-            }
-            if (i != this.output.length - 1) p.appendChild(document.createTextNode(", "));
-        }
-
-        let r = document.createElement("span");
-        r.innerText = " (předl.";
-        if (this.fall.length > 0) {
-            r.innerText += ", pád: " + this.fall.join(", ");
-        }
-        r.innerText += ")";
-        r.className = "dicMoreInfo";
-        p.appendChild(r);
-
-        p.appendChild(mapper_link(this.input[0], out));
-
-        if (this.fall.length > 0) return { from: this.input.join(", "), to: out.join(', '), name: langFile.Fall + ": " + this.fall.join(', '), element: p };
-        else return { from: this.input.join(", "), to: this.output.join(', '), name: name, element: p };
     }
 }
 
@@ -1926,192 +1233,46 @@ class ItemSentencePatternPart {
 class ItemPatternPronoun {
     constructor() {
         this.Name;
-        //this.Gender;
         this.Type;
         this.Shapes;
     }
 
     static Load(data) {
         let raw = data.split('|');
-      /*  if (loadedversion == "TW v0.1" || loadedversion == "TW v1.0") {
-            if (raw.length == 14 + 2) {
-                let item = new ItemPatternPronoun();
-                item.Name = raw[0];
-                item.Type = 1;
-                item.Gender = parseInt(raw[1]);
-                item.Shapes = [14];
-                for (let i = 0; i < 14; i++) {
-                    if (raw[2 + i].includes('?')) item.Shapes[i] = '?';
-                    else item.Shapes[i] = raw[2 + i].split(',');
-                }
-                return item;
-            }
-            if (raw.length == 7 + 2) {
-                let item = new ItemPatternPronoun();
-                item.Name = raw[0];
-                item.Type = 2;
-                item.Gender = parseInt(raw[1]);
-                item.Shapes = [7];
-                for (let i = 0; i < 7; i++) {
-                    if (raw[2 + i].includes('?')) item.Shapes[i] = '?';
-                    else item.Shapes[i] = raw[2 + i].split(',');
-                }
-                return item;
-            }
-            if (raw.length == 1 + 2) {
-                let item = new ItemPatternPronoun();
-                item.Name = raw[0];
-                item.Type = 3;
-                item.Gender = parseInt(raw[1]);
-                item.Shapes = raw[2].split(',');
-                if (raw[2].includes('?')) item.Shapes[0] = '?';
-                return item;
-            }
-            if (raw.length == 14 * 4 + 2) {
-                let item = new ItemPatternPronoun();
-                item.Name = raw[0];
-                item.Type = 4;
-                item.Gender = parseInt(raw[1]);
-                item.Shapes = [14 * 4];
-                for (let i = 0; i < 14 * 4; i++) {
-                    if (raw[2 + i].includes('?')) item.Shapes[i] = '?';
-                    else item.Shapes[i] = raw[2 + i].split(',');
-                }
-                return item;
-            }
-            if (dev) console.log("⚠️ PatternPronoun - Chybná délka");
-        } else if (loadedVersionNumber == 2) {*/
-            let shapesAll = LoadArr(raw, 14 * 4, 1)
+  
+        let shapesAll = LoadArr(raw, 14 * 4, 1)
 
-            if (shapesAll.length == 14) {
-                let item = new ItemPatternPronoun();
-                item.Name = raw[0];
-                item.Type = 1;
-                item.Shapes = shapesAll;
-                return item;
-            }
-            if (shapesAll.length == 7) {
-                let item = new ItemPatternPronoun();
-                item.Name = raw[0];
-                item.Type = 2;
-                item.Shapes = shapesAll;
-                return item;
-            }
-            if (shapesAll.length == 1) {
-                let item = new ItemPatternPronoun();
-                item.Name = raw[0];
-                item.Type = 3;
-                item.Shapes = shapesAll;
-                return item;
-            }
-            if (shapesAll.length == 14 * 4) {
-                let item = new ItemPatternPronoun();
-                item.Name = raw[0];
-                item.Type = 4;
-                item.Shapes = [14 * 4];
-                item.Shapes = shapesAll;
-                return item;
-            }
-            if (dev) console.log("⚠️ PatternPronoun - Chybná délka (" + raw.length + ")");
-       // }
+        if (shapesAll.length == 14) {
+            let item = new ItemPatternPronoun();
+            item.Name = raw[0];
+            item.Type = 1;
+            item.Shapes = shapesAll;
+            return item;
+        }
+        if (shapesAll.length == 7) {
+            let item = new ItemPatternPronoun();
+            item.Name = raw[0];
+            item.Type = 2;
+            item.Shapes = shapesAll;
+            return item;
+        }
+        if (shapesAll.length == 1) {
+            let item = new ItemPatternPronoun();
+            item.Name = raw[0];
+            item.Type = 3;
+            item.Shapes = shapesAll;
+            return item;
+        }
+        if (shapesAll.length == 14 * 4) {
+            let item = new ItemPatternPronoun();
+            item.Name = raw[0];
+            item.Type = 4;
+            item.Shapes = [14 * 4];
+            item.Shapes = shapesAll;
+            return item;
+        }
+        if (dev) console.log("⚠️ PatternPronoun - Chybná délka (" + raw.length + ")");
         return null;
-    }
-
-    GetDic(prefix) {
-        let table = document.createElement("table");
-        let tbody = document.createElement("tbody");
-
-        // 7pádů, jednočíslo, jeden rod
-        if (SType == 3) {
-            {
-                let row = document.createElement("tr");
-
-                let cellP = document.creteElement("td");
-                cellP = langFile.Fall;
-                row.appendChild(cellP);
-
-                let cell = document.creteElement("td");
-                cell = "Tvar";
-                row.appendChild(cell);
-            }
-            for (const r = 0; r < 7; r++) {
-                let row = document.createElement("tr");
-
-                let cellP = document.creteElement("td");
-                cellP = r + 1;
-                row.appendChild(cellP);
-
-                let cell = document.creteElement("td");
-                cell = prefix + this.Shapes[r];
-                row.appendChild(cell);
-            }
-        }
-
-        // 7pádů, jeden rod
-        if (SType == 4) {
-            {
-                let row = document.createElement("tr");
-
-                let cellP = document.creteElement("td");
-                cellP = langFile.Fall;
-                row.appendChild(cellP);
-
-                let cell0 = document.creteElement("td");
-                cell0 = langFile.Single;
-                row.appendChild(cell0);
-
-                let cell1 = document.creteElement("td");
-                cell1 = langFile.Multiple;
-                row.appendChild(cell1);
-            }
-            for (const r = 0; r < 14; r + 2) {
-                let row = document.createElement("tr");
-
-                let cellP = document.creteElement("td");
-                cellP = r + 1;
-                row.appendChild(cellP);
-
-                let cell0 = document.creteElement("td");
-                cell0 = prefix + this.Shapes[r];
-                row.appendChild(cell0);
-
-                let cell1 = document.creteElement("td");
-                cell1 = prefix + this.Shapes[r + 1];
-                row.appendChild(cell1);
-            }
-        }
-
-        // 7pádů, více rodů
-        if (SType == 5) {
-            {
-                let row = document.createElement("tr");
-
-                let cellP = document.creteElement("td");
-                cellP = langFile.Fall;
-                row.appendChild(cellP);
-            }
-
-            for (const r = 0; r < 4 * 14; r + 4 * 2) {
-                let row = document.createElement("tr");
-
-                let cellP = document.creteElement("td");
-                cellP = r + 1;
-                row.appendChild(cellP);
-
-                for (const t = 0; t < 4; t++) {
-                    let cell0 = document.creteElement("td");
-                    cell0 = prefix + this.Shapes[r];
-                    row.appendChild(cell0);
-
-                    let cell1 = document.creteElement("td");
-                    cell1 = prefix + this.Shapes[r + 1];
-                    row.appendChild(cell1);
-                }
-            }
-        }
-
-        table.appenChild(tbody);
-        return table;
     }
 }
 
@@ -2126,74 +1287,24 @@ class ItemPronoun {
 
     static Load(data) {
         let raw = data.split('|');
-        /*if (loadedversion == "TW v0.1" || loadedversion == "TW v1.0") {
-            if (raw.length == 4) {
-                let item = new ItemPronoun();
-                item.From = raw[0];
-                //item.To=raw[1];
 
-                let paternFrom = this.GetPatternByNameFrom(raw[2]);
-                if (paternFrom == null) return null;
-                else item.PatternFrom = paternFrom;
+        let item = new ItemPronoun();
+        item.From = raw[0];
 
-                let paternTo = this.GetPatternByNameTo(raw[3]);
-                if (paternTo == null) return null;
-                //else item.PatternTo = paternTo;
-                item.To = [{ Body: raw[1], Pattern: paternTo }];
-                return item;
-            }
-            if (raw.length == 3) {
-                let item = new ItemPronoun();
-                item.From = raw[0];
-                //	item.To=raw[0];
-
-                let paternFrom = this.GetPatternByNameFrom(raw[1]);
-                if (paternFrom == null) return null;
-                else item.PatternFrom = paternFrom;
-
-                let paternTo = this.GetPatternByNameTo(raw[2]);
-                if (paternTo == null) return null;
-
-                item.To = [{ Body: raw[0], Pattern: paternTo }];
-
-                return item;
-            }
-            if (raw.length == 2) {
-                let item = new ItemPronoun();
-                item.From = "";
-                //item.To="";
-
-                let paternFrom = this.GetPatternByNameFrom(raw[0]);
-                if (paternFrom == null) return null;
-                else item.PatternFrom = paternFrom;
-
-                let paternTo = this.GetPatternByNameTo(raw[1]);
-                if (paternTo == null) return null;
-
-                item.To = [{ Body: "", Pattern: paternTo }];
-
-                return item;
-            }
+        let paternFrom = this.GetPatternByNameFrom(raw[1]);
+        if (paternFrom == null) {
+            if (dev) console.log("Cannot load pattern '" + raw[1] + "'");
             return null;
-        } else if (loadedVersionNumber >= 2) {*/
-            let item = new ItemPronoun();
-            item.From = raw[0];
+        }
+        item.PatternFrom = paternFrom;
 
-            let paternFrom = this.GetPatternByNameFrom(raw[1]);
-            if (paternFrom == null) {
-                if (dev) console.log("Cannot load pattern '" + raw[1] + "'");
-                return null;
-            }
-            item.PatternFrom = paternFrom;
+        let to = FastLoadTranslateToWithPattern(raw, 2, this);
+        if (to == null) {
+            return null;
+        }
+        item.To = to;
 
-            let to = FastLoadTranslateToWithPattern(raw, 2, this);
-            if (to == null) {
-                return null;
-            }
-            item.To = to;
-
-            return item;
-       // }
+        return item;
     }
 
     static GetPatternByNameFrom(name) {
@@ -2617,55 +1728,6 @@ class ItemPronoun {
         return null;
     }
 
-    GetDicForm(name) {
-        if (this.To == undefined) return null;
-        if (this.PatternFrom.Shapes[0] == "?") return null;
-        //if (this.PatternTo.Shapes[0]=="?") return null;
-
-        let p = document.createElement("p");
-        let f = document.createElement("span");
-        f.innerText = this.From + this.PatternFrom.Shapes[0];
-        
-        p.appendChild(f);
-
-        let e = document.createElement("span");
-        e.innerText = " → ";
-        p.appendChild(e);
-
-        let to_out=[];
-        for (let to of this.To) {
-            let t = document.createElement("span");
-            if (to.Pattern.Shapes[0] != "?" && to.Pattern.Shapes[0] != "-") {
-                let to_text=ApplyPostRules(to.Body + to.Pattern.Shapes[0]);
-                to_out.push(to_text);
-                t.innerText += to_text;
-            }else return null;
-            p.appendChild(t);
-
-            if (to.Pattern.Shapes.lenght > 1) {
-                t.addEventListener("click", () => {
-                    ShowPageLangD(t.GetTable());
-                });
-                t.class = "dicCustom";
-            }
-            
-            // cites
-            GenerateSupCite(to.Source).forEach(e => p.appendChild(e));                
-        } 
-       /* f.addEventListener("click", function(){
-            mapper_open(f.innerText,to_out);
-        });*/
-
-        let r = document.createElement("span");
-        r.innerText = " (zájm.)";
-        r.className = "dicMoreInfo";
-        p.appendChild(r);
-
-        p.appendChild(mapper_link(f.innerText,to_out));
-
-        return { from: this.From + this.PatternFrom.Shapes[0], /*this.To+this.PatternTo.Shapes[0]*/ to: "", name: name, element: p };
-    }
-
     GetTable() {
         return this.PatternTo.GetTable(this.To);
     }
@@ -2731,79 +1793,6 @@ class ItemPatternAdjective {
                 return arr;
             }
         }
-    }
-
-    GetTable(prefix) {
-        let table = document.getElementById("table")
-        let tbody = document.createElement("tbody");
-
-        let caption = document.createElement("caption");
-        caption.innerText = "Přídavné jméno";
-        tbody.appendChild(caption);
-
-        {
-            let tr = document.createElement("tr");
-
-            let td1 = document.createElement("td");
-            td1.innerText = langFile.Fall;
-            tr.appenChild(td1);
-
-            let td3 = document.createElement("td");
-            td3.innerText = "Střední";
-            tr.appenChild(td3);
-
-            let td4 = document.createElement("td");
-            td4.innerText = "Ženský";
-            tr.appenChild(td4);
-
-            let td5 = document.createElement("td");
-            td5.innerText = "Mužský živ.";
-            tr.appenChild(td5);
-
-            let td6 = document.createElement("td");
-            td6.innerText = "Mužský než.";
-            tr.appenChild(td6);
-
-            tbody.appenChild(tr);
-        }
-
-        {
-            let tr = document.createElement("tr");
-
-            let td1 = document.createElement("td");
-            td1.innerText = langFile.Fall;
-            tr.appenChild(td1);
-
-            for (const x = 0; x < 4; x++) {
-                let tdj = document.createElement("td");
-                tdj.innerText = langFile.Single;
-                tr.appenChild(tdj);
-
-                let tdm = document.createElement("td");
-                tdm.innerText = langFile.Multiple;
-                tr.appenChild(tdm);
-            }
-
-            tbody.appenChild(tr);
-        }
-        s
-
-        for (let c = 0; c < 14; c += 2) {
-            let tr = document.createElement("tr");
-
-            let td1 = document.createElement("td");
-            td1.innerText = prefix + Middle[c];
-            tr.appenChild(td1);
-
-            let td2 = document.createElement("td");
-            td2.innerText = prefix + Middle[c + 1];
-            tr.appenChild(td2);
-
-            tbody.appenChild(tr);
-        }
-        table.appenChild(tbody);
-
-        return table;
     }
 }
 
@@ -3165,60 +2154,7 @@ class ItemAdjective {
         }
         return null;
     }
-
-    GetDicForm(name) {
-        if (typeof this.PatternTo == undefined) return null;
-        if (this.To.Shapes == undefined) return null;
-        //if (this.PatternTo.Shapes[0]=="-") return null;
-
-        let from = "",
-            to = "";
-
-        for (let t of this.To) {
-            if (t.Shapes[0] != "?") {
-                to += ApplyPostRules(t.Body + t.Pattern.Shapes[0]) + ", ";
-            } else return null;
-        }
-
-        if (this.PatternFrom.Shapes[0] != "?") {
-            from = this.From + this.PatternFrom.Shapes[0];
-        } else return null;
-
-        let p = document.createElement("p");
-        let f = document.createElement("span");
-        f.innerText = from;
-        /*f.classList="slink";
-        f.addEventListener("click", function(){
-            mapper_open(f.innerText,to);
-        });
-        p.appendChild(f);*/
-
-        let e = document.createElement("span");
-        e.innerText = " → ";
-        p.appendChild(e);
-
-        let t = document.createElement("span");
-        t.innerText = to;
-        p.appendChild(t);
-
-        t.addEventListener("click", () => {
-            ShowPageLangD(t.GetTable());
-        });
-        t.class = "dicCustom";
-        
-        // cites
-        GenerateSupCite(to.Source).forEach(e => p.appendChild(e));                
-
-        let r = document.createElement("span");
-        r.innerText = " (příd.)";
-        r.className = "dicMoreInfo";
-        p.appendChild(r);
-
-        p.appendChild(mapper_link(from, to));
-
-        return { from: from, to: to, name: name, element: p };
-    }
-
+  
     GetTable() {
         return this.PatternTo.GetTable(this.To);
     }
@@ -3290,28 +2226,6 @@ class ItemPatternNumber {
         } else return null;*/
 
         return item;
-    }
-
-    GetTable(to) {
-        let tbody = document.createElement("tbody");
-        tbody.appendChild(document.createTextNode("Číslovka"));
-        if (Shapes.length == 14) {
-            for (let c = 0; c < 14; c += 2) {
-                let tr = document.createElement("tr");
-
-                let td1 = document.createElement("td");
-                td1.innerText = to.Body + Shapes[c];
-                tr.appenChild(td1);
-
-                let td2 = document.createElement("td");
-                td2.innerText = to.Body + Shapes[c + 1];
-                tr.appenChild(td2);
-
-                tbody.appenChild(tr);
-            }
-        }
-
-        return tbody;
     }
 }
 
@@ -3533,7 +2447,6 @@ class ItemNumber {
 class ItemPatternVerb {
     constructor() {
         this.Name;
-        //this.Infinitive = "";
 
         this.SContinous = false;
         this.SImperative = false;
@@ -3546,18 +2459,6 @@ class ItemPatternVerb {
     }
 
     static GetArray(source, pos, len) {
-        /*let arr = [len];
-        for (let i=0; i<len; i++) {			
-        	if (source[pos+i].includes(",")) {
-        		arr[i]=[];
-        		for (let f of source[pos+i].split(',')) {
-        			if (f.includes('?')) arr[i].push('?'); 
-        			else arr[i].push(f); 
-        		}
-        	}//arr[i]=source[pos+i].split(',');
-        	else if (source[pos+i].includes('?')) arr[i]='?'; 
-        	else arr[i]=source[pos+i];
-        }*/
         let arr = [];
         for (let i = pos; i < pos + len; i++) {
             arr.push(source[i]);
@@ -3584,33 +2485,7 @@ class ItemPatternVerb {
 
         // uncompress array
         let arrayOfShapes = LoadArr(raw, 100, 3);
-        /*	for (let i=3; i<raw.length; i++) {
-        		let rawShapes=raw[i];
-        		
-        		if (!rawShapes.includes(",")) {
-        			if (rawShapes.startsWith("?×")){
-        				let cntRaw=rawShapes.substring(2);
-        				let cnt=parseInt(cntRaw);
-        				for (let j=0; j<cnt; j++) arrayOfShapes.push("?");
-        				i+=cnt;
-        				continue;
-        			} else if (rawShapes.startsWith("-×")){
-        				let cntRaw=rawShapes.substring(2);
-        				let cnt=parseInt(cntRaw);
-        				for (let j=0; j<cnt; j++) arrayOfShapes.push("-");
-        				i+=cnt;
-        				continue;
-        			}
-        		}
-
-        		arrayOfShapes.push(raw[i].split(','));
-        	}*/
-
-
-        //if (arrayOfShapes[0].includes('?')) item.Infinitive='?';
-        //else 
-       // if (arrayOfShapes[0].includes(",")){
-        //console.log(arrayOfShapes);
+ 
         item.Infinitive = arrayOfShapes[0];
        // } else item.Infinitive = arrayOfShapes[0];
 
@@ -3649,366 +2524,7 @@ class ItemPatternVerb {
             item.Auxiliary = this.GetArray(arrayOfShapes, index, 6);
             index += 6;
         }
-        //			console.log(item);
-        return item;
-        //} catch {
-        //		return null;
-        //	}
-        /*	let index=4;
-        	if (item.TypeShow==4 || item.TypeShow==0) { 
-        		item.Infinitive=raw[3];
-        		item.Continous      = this.GetArray(raw, index, 6); index+=6;
-        		item.Future         = this.GetArray(raw, index, 6); index+=6;
-        		item.Imperative     = this.GetArray(raw, index, 3); index+=3;
-        		item.PastActive     = this.GetArray(raw, index, 8); index+=8;
-        		item.PastPassive    = this.GetArray(raw, index, 8); index+=8;
-        		item.Transgressive  = this.GetArray(raw, index, 6); index+=6;
-        		item.Auxiliary      = this.GetArray(raw, index, 6); index+=6;
-        	} else if (item.TypeShow==1) { 
-        		item.Infinitive=raw[3];
-        		item.Continous      = this.GetArray(raw, index, 6); index+=6;
-        		item.Imperative     = this.GetArray(raw, index, 3); index+=3;
-        		item.PastPassive    = this.GetArray(raw, index, 8); index+=8;
-        		item.Transgressive  = this.GetArray(raw, index, 6); index+=6;
-        	} else if (item.TypeShow==2) { 
-        		item.Infinitive=raw[3];
-        		item.Continous      = this.GetArray(raw, index, 6); index+=6;
-        		item.Imperative     = this.GetArray(raw, index, 3); index+=3;
-        		item.PastActive     = this.GetArray(raw, index, 8); index+=8;
-        		item.Transgressive  = this.GetArray(raw, index, 6); index+=6;
-        	} else if (item.TypeShow==3) { 
-        		item.Infinitive=raw[3];
-        		item.Continous      = this.GetArray(raw, index, 6); index+=6;
-        		item.Imperative     = this.GetArray(raw, index, 3); index+=3;
-        		item.PastActive     = this.GetArray(raw, index, 8); index+=8;
-        		item.PastPassive    = this.GetArray(raw, index, 8); index+=8;
-        		item.Transgressive  = this.GetArray(raw, index, 6); index+=6;
-        	} else {
-        		//throw new Exception("Unknown ShowType");
-        		return null;
-        	}*/
-        //	return item;
-    }
-
-    GetTable(verbPrefix) {
-        let combineWord = function(arr) {
-            if (!Array.isArray(arr))arr=[arr];
-            let o=[];
-            for (let a of arr) {
-                if (a!="?") o.push(ApplyPostRules(verbPrefix+a));
-            }
-            if (o.length==0) return "?";
-            return o.join(", ");
-        }
-
-
-        let parent = document.createElement("div");
-
-        // Infinitive
-        {
-            let tableI = document.createElement("table");
-            tableI.className="tableDic";
-            parent.appendChild(tableI);
-
-            let caption = document.createElement("caption");
-            caption.innerText = langFile.Infinitive;
-            tableI.appendChild(caption);
-
-            let tbody = document.createElement("tbody");
-            tableI.appendChild(tbody); 
-            {
-                let tr = document.createElement("tr");
-
-                /*let td0=document.createElement("td");
-                td0.innerText=langFile.Infinitive;
-                tr.appendChild(td0);*/
-
-                let td1 = document.createElement("td");
-                td1.innerText = combineWord(this.Infinitive);
-                tr.appendChild(td1);
-                tbody.appendChild(tr);
-            }
-        }
-
-        // Continous
-        if (this.SContinous) {
-            let tableC = document.createElement("table");
-            tableC.className="tableDic";
-            parent.appendChild(tableC);
-
-            let caption = document.createElement("caption");
-            caption.innerText = langFile.Continous;
-            tableC.appendChild(caption);
-
-            let tbody = document.createElement("tbody");
-            tableC.appendChild(tbody);
-
-            let tr = document.createElement("tr");
-
-            let td0 = document.createElement("td");
-            td0.innerText = langFile.Person;
-            td0.style.fontWeight = "bold";
-            tr.appendChild(td0);
-
-            let td1 = document.createElement("td");
-            td1.innerText = langFile.Single;
-            td1.style.fontWeight = "bold";
-            tr.appendChild(td1);
-
-            let td2 = document.createElement("td");
-            td2.innerText = langFile.Multiple;
-            td2.style.fontWeight = "bold";
-            tr.appendChild(td2);
-
-            tbody.appendChild(tr);
-
-            for (let c = 0; c < 6; c += 2) {
-                let tr = document.createElement("tr");
-
-                let td0 = document.createElement("td");
-                td0.innerText = c % 3 + 1;
-                tr.appendChild(td0);
-
-                let td1 = document.createElement("td");
-                td1.innerText = combineWord(this.Continous[c]);
-                tr.appendChild(td1);
-
-                let td2 = document.createElement("td");
-                td2.innerText = combineWord(this.Continous[c + 1]);
-                tr.appendChild(td2);
-
-                tbody.appendChild(tr);
-            }
-        }
-
-        // Future
-        if (this.SFuture) {
-            let tableC = document.createElement("table");
-            tableC.className="tableDic";
-            parent.appendChild(tableC);
-
-            let caption = document.createElement("caption");
-            caption.innerText = langFile.Future;
-            tableC.appendChild(caption);
-
-
-            let tbody = document.createElement("tbody");
-            tableC.appendChild(tbody);
-
-            let tr = document.createElement("tr");
-
-            let td0 = document.createElement("td");
-            td0.innerText = langFile.Person;
-            td0.style.fontWeight = "bold";
-            tr.appendChild(td0);
-
-            let td1 = document.createElement("td");
-            td1.innerText = langFile.Single;
-            td1.style.fontWeight = "bold";
-            tr.appendChild(td1);
-
-            let td2 = document.createElement("td");
-            td2.innerText = langFile.Multiple;
-            td2.style.fontWeight = "bold";
-            tr.appendChild(td2);
-
-            tbody.appendChild(tr);
-
-            for (let c = 0; c < 6; c += 2) {
-                let tr = document.createElement("tr");
-
-                let td0 = document.createElement("td");
-                td0.innerText = c % 3 + 1;
-                tr.appendChild(td0);
-
-                let td1 = document.createElement("td");
-                td1.innerText = combineWord(this.Future[c]);
-                tr.appendChild(td1);
-
-                let td2 = document.createElement("td");
-                td2.innerText = combineWord(this.Future[c + 1]);
-                tr.appendChild(td2);
-
-                tbody.appendChild(tr);
-            }
-        }
-
-        // Imperative
-        if (this.SImperative) {
-            let tableC = document.createElement("table");            
-            tableC.className="tableDic";
-            parent.appendChild(tableC);
-
-            let caption = document.createElement("caption");
-            caption.innerText = langFile.Imperative;
-            tableC.appendChild(caption);
-
-            let tbody = document.createElement("tbody");
-            tableC.appendChild(tbody);
-
-            let tr = document.createElement("tr");
-
-            let td0 = document.createElement("td");
-            td0.innerText = langFile.Person;
-            td0.style.fontWeight = "bold";
-            tr.appendChild(td0);
-
-            let td1 = document.createElement("td");
-            td1.innerText = langFile.Single;
-            td1.style.fontWeight = "bold";
-            tr.appendChild(td1);
-
-            let td2 = document.createElement("td");
-            td2.innerText = langFile.Multiple;
-            td2.style.fontWeight = "bold";
-            tr.appendChild(td2);
-
-            tbody.appendChild(tr);
-
-            {
-                let tr = document.createElement("tr");
-
-                let td0 = document.createElement("td");
-                td0.innerText = "1";
-                tr.appendChild(td0);
-
-                let td1 = document.createElement("td");
-                td1.innerText = "-";
-                tr.appendChild(td1);
-
-                let td2 = document.createElement("td");
-                td2.innerText = combineWord(this.Imperative[1]);
-                tr.appendChild(td2);
-
-                tbody.appendChild(tr);
-            } {
-                let tr = document.createElement("tr");
-
-                let td0 = document.createElement("td");
-                td0.innerText = "2";
-                tr.appendChild(td0);
-
-                let td1 = document.createElement("td");
-                td1.innerText = combineWord(this.Imperative[0]);
-                tr.appendChild(td1);
-
-                let td2 = document.createElement("td");
-                td2.innerText = combineWord(this.Imperative[2]);
-                tr.appendChild(td2);
-
-                tbody.appendChild(tr);
-            }
-        }
-
-        // Past Active
-        if (this.SPastActive) {
-            let tableC = document.createElement("table");
-            tableC.className="tableDic";
-            parent.appendChild(tableC);
-
-            let caption = document.createElement("caption");
-            caption.innerText = langFile.PastActive;
-            tableC.appendChild(caption);
-
-            let tbody = document.createElement("tbody");
-            tableC.appendChild(tbody);
-
-            let tr = document.createElement("tr");
-
-            let td0 = document.createElement("td");
-            td0.innerText = langFile.Gender;
-            td0.style.fontWeight = "bold";
-            tr.appendChild(td0);
-
-            let td1 = document.createElement("td");
-            td1.innerText = langFile.Single;
-            td1.style.fontWeight = "bold";
-            tr.appendChild(td1);
-
-            let td2 = document.createElement("td");
-            td2.innerText = langFile.Multiple;
-            td2.style.fontWeight = "bold";
-            tr.appendChild(td2);
-
-            tbody.appendChild(tr);
-
-            for (let c = 0; c < 8; c += 2) {
-                let tr = document.createElement("tr");
-
-                let td0 = document.createElement("td");
-                if (c == 0) td0.innerText = "Muž. živ.";
-                else if (c == 2) td0.innerText = "Muž. než.";
-                else if (c == 4) td0.innerText = "ženský";
-                else if (c == 6) td0.innerText = "Střední";
-                tr.appendChild(td0);
-
-                let td1 = document.createElement("td");
-                td1.innerText = combineWord(this.PastActive[c/2]);
-                tr.appendChild(td1);
-
-                let td2 = document.createElement("td");
-                td2.innerText = combineWord(this.PastActive[c + 1]);
-                tr.appendChild(td2);
-
-                tbody.appendChild(tr);
-            }
-        }
-
-        // Past passive
-        if (this.SPastPassive) {
-            let tableC = document.createElement("table");
-            tableC.className="tableDic";
-            parent.appendChild(tableC);
-            
-            let caption = document.createElement("caption");
-            caption.innerText = langFile.PastPasive;
-            tableC.appendChild(caption);
-
-            let tbody = document.createElement("tbody");
-            tableC.appendChild(tbody);
-
-            let tr = document.createElement("tr");
-
-            let td0 = document.createElement("td");
-            td0.innerText = langFile.Gender;
-            td0.style.fontWeight = "bold";
-            tr.appendChild(td0);
-
-            let td1 = document.createElement("td");
-            td1.innerText = langFile.Single;
-            td1.style.fontWeight = "bold";
-            tr.appendChild(td1);
-
-            let td2 = document.createElement("td");
-            td2.innerText = langFile.Multiple;
-            td2.style.fontWeight = "bold";
-            tr.appendChild(td2);
-
-            tbody.appendChild(tr);
-
-            for (let c = 0; c < 8; c += 2) {
-                let tr = document.createElement("tr");
-
-                let td0 = document.createElement("td");
-                if (c == 0) td0.innerText = "Muž. živ.";
-                else if (c == 2) td0.innerText = "Muž. než.";
-                else if (c == 4) td0.innerText = "ženský";
-                else if (c == 6) td0.innerText = "Střední";
-                tr.appendChild(td0);
-
-                let td1 = document.createElement("td");
-                td1.innerText = combineWord(this.PastPassive[c]);
-                tr.appendChild(td1);
-
-                let td2 = document.createElement("td");
-                td2.innerText = combineWord(this.PastPassive[c + 1]);
-                tr.appendChild(td2);
-
-                tbody.appendChild(tr);
-            }
-        }
-
-        return parent;
+        return item;     
     }
 }
 
@@ -4226,111 +2742,61 @@ class Replace {
 
 class LanguageTr {
     constructor() {
-            this.Name = "";
-            //	this.myVocab=[];
-            //	this.Words=[];
-            //this.SameWords=[];
-            this.Sentences = [];
-            this.Phrases = [];
-            this.state = "instanced";
-            this.html = true;
-            this.SelectReplace = [];
-            this.SentencePatterns = [];
-            this.SentencePatternParts = [];
-            this.SentenceParts = [];
-            //	dev=false;
-            this.SimpleWords = [];
-            this.PatternNounsFrom = [];
-            this.PatternNounsTo = [];
-            this.PatternAdjectivesFrom = [];
-            this.PatternAdjectivesTo = [];
-            this.PatternPronounsFrom = [];
-            this.PatternPronounsTo = [];
-            this.PatternNumbersFrom = [];
-            this.PatternNumbersTo = [];
-            this.PatternVerbsFrom = [];
-            this.PatternVerbsTo = [];
-            this.Nouns = [];
-            this.Pronouns = [];
-            this.Verbs = [];
-            this.Adjectives = [];
-            this.Numbers = [];
-            this.Prepositions = [];
-            this.Interjections = [];
-            this.Particles = [];
-            this.Adverbs = [];
-            this.Conjunctions = [];
-            this.option = undefined;
-            this.ReplaceS = [];
-            this.ReplaceG = [];
-            this.ReplaceE = [];
+        this.Name = "";
+        this.Sentences = [];
+        this.Phrases = [];
+        this.state = "instanced";
+        this.SelectReplace = [];
+        this.SentencePatterns = [];
+        this.SentencePatternParts = [];
+        this.SentenceParts = [];
+        //	dev=false;
+        this.SimpleWords = [];
+        this.PatternNounsFrom = [];
+        this.PatternNounsTo = [];
+        this.PatternAdjectivesFrom = [];
+        this.PatternAdjectivesTo = [];
+        this.PatternPronounsFrom = [];
+        this.PatternPronounsTo = [];
+        this.PatternNumbersFrom = [];
+        this.PatternNumbersTo = [];
+        this.PatternVerbsFrom = [];
+        this.PatternVerbsTo = [];
+        this.Nouns = [];
+        this.Pronouns = [];
+        this.Verbs = [];
+        this.Adjectives = [];
+        this.Numbers = [];
+        this.Prepositions = [];
+        this.Interjections = [];
+        this.Particles = [];
+        this.Adverbs = [];
+        this.Conjunctions = [];
+        this.option = undefined;
+        this.ReplaceS = [];
+        this.ReplaceG = [];
+        this.ReplaceE = [];
 
-            this.MakeBold = "\x1b[1m";
-            this.MakeUnderline = "\x1b[4m";
-            this.MakeGreen = "\x1b[32m";
-            this.MakeBlue = "\x1b[34m";
-            this.MakeCyan = "\x1b[36m";
+        this.MakeBold = "\x1b[1m";
+        this.MakeUnderline = "\x1b[4m";
+        this.MakeGreen = "\x1b[32m";
+        this.MakeBlue = "\x1b[34m";
+        this.MakeCyan = "\x1b[36m";
 
-            this.qualityTrTotalTranslatedWell = 0.0;
-            this.qualityTrTotalTranslated = 0.0;
+        this.qualityTrTotalTranslatedWell = 0.0;
+        this.qualityTrTotalTranslated = 0.0;
 
+        this.locationX = NaN;
+        this.locationY = NaN;
+        this.gpsX = NaN;
+        this.gpsY = NaN;
+        this.Quality = 0;
+        this.Author = "";
+        this.LastDateEdit = "";
+        this.Comment = "";
+        this.baseLangName = null;
+    }
 
-            this.locationX = NaN;
-            this.locationY = NaN;
-            this.gpsX = NaN;
-            this.gpsY = NaN;
-            this.Quality = 0;
-            this.Author = "";
-            this.LastDateEdit = "";
-            this.Comment = "";
-            this.baseLangName = null;
-        }
-        /*
-        	GetVocabulary() {
-        		this.state="downloading";
-        	//	dev=dev;
-        		if (dev) console.log("INFO| Starting Downloading '"+this.Name+".trw'");
-        		let request=new XMLHttpRequest();
-        		request.timeout=4000;
-        		request.open('GET', "DIC/"+this.Name+".trw", true);
-        		request.send();
-        		let self=this;
-        		request.onerror=function() {
-        			if (dev) console.log("ERROR| Cannot downloaded '"+self.Name+".trw'");
-        			this.state="cannot download";
-        		};
-        		let x=this;
-        		request.onreadystatechange=function() {
-        			this.state="download status "+request.status;
-        			if(request.readyState===4) {
-        				this.state="download status "+request.status;
-        				if(request.status===200) {
-        					this.state="downloaded";
-        					if(dev) console.log("INFO| Downloaded '"+self.name+".trw'");
-
-        					let text=request.responseText;
-        						
-        					let lines=text.split('\r\n');
-        					if(lines.length<5&&dev) {
-        						if(dev) console.log("WARLING| Downloaded '"+self.name+".trw' seems too small");
-        						enabletranslate=false;
-        						ReportDownloadedLanguage();
-        						return;
-        					}
-        					// document.getElementById('slovnik').innerText = lines.length;
-        					x.Load(lines);
-        					ReportDownloadedLanguage();
-        				} else {
-        					if(request.status==0) ShowError("<b>Jejda, něco se pokazilo.</b><br>Nelze stáhnout seznam slovíček překladu...'"+self.name+"'<br>");
-        					else ShowError("<b>Jejda, něco se pokazilo.</b><br>Nelze stáhnout seznam slovíček překladu<br>Chyba '"+request.status+"..."+self.name+"'<br>");
-        					DisableLangTranslate(self.name);
-        					ReportDownloadedLanguage();
-        					this.state="download errored";
-        					return;
-        				}
-        			}
-        		};
-        	}*/
     Stats() {
         let stats = 0;
         stats += this.SimpleWords.length;
@@ -4418,9 +2884,9 @@ class LanguageTr {
                     }
                     break;
 
-                case "e":
+                /*case "e":
                     this.BuildSelect(line.substring(1));
-                    break;
+                    break;*/
 
                 case "c":
                     {
@@ -4518,9 +2984,9 @@ class LanguageTr {
 
             let item = ItemSentencePattern.Load(line);
             if (item !== null && item !== undefined) this.SentencePatterns.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'SentencePattern' item at line " + i + ". ", line);
+            else if (dev) console.warn("Cannot load 'SentencePattern' item at line " + i + ". ", line);
         }
-        if (fullDev) console.log("🔣 Loaded SentencePatterns", this.SentencePatterns);
+        if (fullDev) console.log("Loaded SentencePatterns", this.SentencePatterns);
 
         // SentencePartPattern
         for (i++; i < lines.length; i++) {
@@ -4529,9 +2995,9 @@ class LanguageTr {
 
             let item = ItemSentencePatternPart.Load(line);
             if (item !== null && item !== undefined) this.SentencePatternParts.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'SentencePartPattern' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'SentencePartPattern' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded SentencePartPatterns", this.SentencePartPatterns);
+        if (fullDev) console.log("Loaded SentencePartPatterns", this.SentencePartPatterns);
 
 
         // Sentences
@@ -4541,9 +3007,9 @@ class LanguageTr {
 
             let item = ItemSentence.Load(line);
             if (item !== null && item !== undefined) this.Sentences.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Sentence' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Sentence' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Sentences", this.Sentences);
+        if (fullDev) console.log("Loaded Sentences", this.Sentences);
 
         // SentencesParts
         for (i++; i < lines.length; i++) {
@@ -4552,9 +3018,9 @@ class LanguageTr {
 
             let item = ItemSentencePart.Load(line);
             if (item !== null && item !== undefined) this.SentenceParts.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'SentencePart' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'SentencePart' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded SentenceParts", this.SentenceParts);
+        if (fullDev) console.log("Loaded SentenceParts", this.SentenceParts);
 
 
         // Phrase
@@ -4564,9 +3030,9 @@ class LanguageTr {
 
             let item = ItemPhrase.Load(line);
             if (item !== null && item !== undefined) this.Phrases.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Phrase' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Phrase' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Phrases", this.Phrases);
+        if (fullDev) console.log("Loaded Phrases", this.Phrases);
 
         // SimpleWords
         for (i++; i < lines.length; i++) {
@@ -4575,9 +3041,9 @@ class LanguageTr {
 
             let item = ItemSimpleWord.Load(line);
             if (item !== null && item !== undefined) this.SimpleWords.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'SimpleWord' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'SimpleWord' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded SimpleWords", this.SimpleWords);
+        if (fullDev) console.log("Loaded SimpleWords", this.SimpleWords);
 
 
         // ReplaceS
@@ -4587,9 +3053,9 @@ class LanguageTr {
 
             let item = ItemReplaceS.Load(line);
             if (item !== null && item !== undefined) this.ReplaceS.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'ReplaceS' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'ReplaceS' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded ReplaceSs", this.ReplaceS);
+        if (fullDev) console.log("Loaded ReplaceSs", this.ReplaceS);
         this.ReplaceS.sort((a, b) => (a.input.length < b.input.length) ? 1 : -1);
 
         // ReplaceG
@@ -4601,7 +3067,7 @@ class LanguageTr {
             if (item !== null && item !== undefined) this.ReplaceG.push(item);
             else if (dev) console.log("⚠️ Cannot load 'ReplaceG' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded ReplaceGs", this.ReplaceG);
+        if (fullDev) console.log("Loaded ReplaceGs", this.ReplaceG);
         this.ReplaceG.sort((a, b) => (a.input.length < b.input.length) ? 1 : -1);
 
         // ReplaceE
@@ -4611,9 +3077,9 @@ class LanguageTr {
 
             let item = ItemReplaceE.Load(line);
             if (item !== null && item !== undefined) this.ReplaceE.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'ReplaceE' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'ReplaceE' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded ReplaceEs", this.ReplaceE);
+        if (fullDev) console.log("Loaded ReplaceEs", this.ReplaceE);
 
 
         // PatternNounFrom
@@ -4623,9 +3089,9 @@ class LanguageTr {
 
             let item = ItemPatternNoun.Load(line);
             if (item !== null && item !== undefined) this.PatternNounsFrom.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternNoun' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternNoun' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternNounsFrom", this.PatternNounsFrom);
+        if (fullDev) console.log("Loaded PatternNounsFrom", this.PatternNounsFrom);
 
         // PatternNounTo
         for (i++; i < lines.length; i++) {
@@ -4634,9 +3100,9 @@ class LanguageTr {
 
             let item = ItemPatternNoun.Load(line);
             if (item !== null && item !== undefined) this.PatternNounsTo.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternNoun' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternNoun' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternNounsTo", this.PatternNounsTo);
+        if (fullDev) console.log("Loaded PatternNounsTo", this.PatternNounsTo);
 
         // Noun
         ItemNoun_pattensFrom = this.PatternNounsFrom;
@@ -4647,9 +3113,9 @@ class LanguageTr {
 
             let item = ItemNoun.Load(line);
             if (item !== null && item !== undefined) this.Nouns.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Noun' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Noun' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Nouns", this.Nouns);
+        if (fullDev) console.log("Loaded Nouns", this.Nouns);
 
         // PatternAdjectivesFrom
         for (i++; i < lines.length; i++) {
@@ -4658,9 +3124,9 @@ class LanguageTr {
 
             let item = ItemPatternAdjective.Load(line);
             if (item !== null && item !== undefined) this.PatternAdjectivesFrom.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternAdjective' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternAdjective' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternAdjectivesFrom", this.PatternAdjectivesFrom);
+        if (fullDev) console.log("Loaded PatternAdjectivesFrom", this.PatternAdjectivesFrom);
 
         // PatternAdjectivesTo
         for (i++; i < lines.length; i++) {
@@ -4669,9 +3135,9 @@ class LanguageTr {
 
             let item = ItemPatternAdjective.Load(line);
             if (item !== null && item !== undefined) this.PatternAdjectivesTo.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternAdjective' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternAdjective' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternAdjectivesTo", this.PatternAdjectivesTo);
+        if (fullDev) console.log("Loaded PatternAdjectivesTo", this.PatternAdjectivesTo);
 
         // Adjectives
         ItemAdjective_pattensFrom = this.PatternAdjectivesFrom;
@@ -4682,9 +3148,9 @@ class LanguageTr {
 
             let item = ItemAdjective.Load(line);
             if (item !== null && item !== undefined) this.Adjectives.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Adjective' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Adjective' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Adjectives", this.Adjectives);
+        if (fullDev) console.log("Loaded Adjectives", this.Adjectives);
 
         // PatternPronounsFrom
         for (i++; i < lines.length; i++) {
@@ -4693,9 +3159,9 @@ class LanguageTr {
 
             let item = ItemPatternPronoun.Load(line);
             if (item !== null && item !== undefined) this.PatternPronounsFrom.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternPronoun' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternPronoun' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternPronounsFrom", this.PatternPronounsFrom);
+        if (fullDev) console.log("Loaded PatternPronounsFrom", this.PatternPronounsFrom);
 
         // PatternPronounsTo
         for (i++; i < lines.length; i++) {
@@ -4704,9 +3170,9 @@ class LanguageTr {
 
             let item = ItemPatternPronoun.Load(line);
             if (item !== null && item !== undefined) this.PatternPronounsTo.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternPronoun' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternPronoun' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternPronounsTo", this.PatternPronounsTo);
+        if (fullDev) console.log("Loaded PatternPronounsTo", this.PatternPronounsTo);
 
         // Pronouns
         ItemPronoun_pattensFrom = this.PatternPronounsFrom;
@@ -4717,9 +3183,9 @@ class LanguageTr {
 
             let item = ItemPronoun.Load(line);
             if (item !== null && item !== undefined) this.Pronouns.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Pronoun' item at line " + i + ". Data: ", line);
+            else if (dev) console.warn("Cannot load 'Pronoun' item at line " + i + ". Data: ", line);
         }
-        if (fullDev) console.log("🔣 Loaded Pronouns", this.Pronouns);
+        if (fullDev) console.log("Loaded Pronouns", this.Pronouns);
 
         // PatternNumbersFrom
         for (i++; i < lines.length; i++) {
@@ -4728,9 +3194,9 @@ class LanguageTr {
 
             let item = ItemPatternNumber.Load(line);
             if (item !== null && item !== undefined) this.PatternNumbersFrom.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternNumber' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternNumber' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternNumbersFrom", this.PatternNumbersFrom);
+        if (fullDev) console.log("Loaded PatternNumbersFrom", this.PatternNumbersFrom);
 
         // PatternNumbersTo
         for (i++; i < lines.length; i++) {
@@ -4739,9 +3205,9 @@ class LanguageTr {
 
             let item = ItemPatternNumber.Load(line);
             if (item !== null && item !== undefined) this.PatternNumbersTo.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternNumber' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternNumber' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternNumbersTo", this.PatternNumbersTo);
+        if (fullDev) console.log("Loaded PatternNumbersTo", this.PatternNumbersTo);
 
         // Numbers
         ItemNumber_pattensFrom = this.PatternNumbersFrom;
@@ -4752,9 +3218,9 @@ class LanguageTr {
 
             let item = ItemNumber.Load(line);
             if (item !== null && item !== undefined) this.Numbers.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Number' item at line " + i + ", data: ", line);
+            else if (dev) console.warn("Cannot load 'Number' item at line " + i + ", data: ", line);
         }
-        if (fullDev) console.log("🔣 Loaded Numbers", this.Numbers);
+        if (fullDev) console.log("Loaded Numbers", this.Numbers);
 
         // PatternVerbsFrom
         for (i++; i < lines.length; i++) {
@@ -4763,9 +3229,9 @@ class LanguageTr {
 
             let item = ItemPatternVerb.Load(line);
             if (item !== null && item !== undefined) this.PatternVerbsFrom.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternVerb' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternVerb' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternVerbsFrom", this.PatternVerbsFrom);
+        if (fullDev) console.log("Loaded PatternVerbsFrom", this.PatternVerbsFrom);
 
         // PatternVerbsTo
         for (i++; i < lines.length; i++) {
@@ -4774,9 +3240,9 @@ class LanguageTr {
 
             let item = ItemPatternVerb.Load(line);
             if (item !== null && item !== undefined) this.PatternVerbsTo.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'PatternVerb' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'PatternVerb' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded PatternVerbsTo", this.PatternVerbsTo);
+        if (fullDev) console.log("Loaded PatternVerbsTo", this.PatternVerbsTo);
 
         // Verb
         ItemVerb_pattensFrom = this.PatternVerbsFrom;
@@ -4787,9 +3253,9 @@ class LanguageTr {
 
             let item = ItemVerb.Load(line);
             if (item !== null && item !== undefined) this.Verbs.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Verb' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Verb' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Verbs", this.Verbs);
+        if (fullDev) console.log("Loaded Verbs", this.Verbs);
 
         // Adverb
         for (i++; i < lines.length; i++) {
@@ -4798,9 +3264,9 @@ class LanguageTr {
 
             let item = ItemAdverb.Load(line);
             if (item !== null && item !== undefined) this.Adverbs.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Adverb' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Adverb' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Adverbs", this.Adverbs);
+        if (fullDev) console.log("Loaded Adverbs", this.Adverbs);
 
         // Preposition
         for (i++; i < lines.length; i++) {
@@ -4809,9 +3275,9 @@ class LanguageTr {
 
             let item = ItemPreposition.Load(line);
             if (item !== null && item !== undefined) this.Prepositions.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Preposition' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Preposition' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Prepositionss", this.Prepositions);
+        if (fullDev) console.log("Loaded Prepositionss", this.Prepositions);
 
         // Conjunction
         for (i++; i < lines.length; i++) {
@@ -4820,9 +3286,9 @@ class LanguageTr {
 
             let item = ItemAdverb.Load(line);
             if (item !== null && item !== undefined) this.Conjunctions.push(item);
-            else if (dev) console.log("⚠️ annot load 'Conjunction' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Conjunction' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Conjunctions", this.Conjunctions);
+        if (fullDev) console.log("Loaded Conjunctions", this.Conjunctions);
 
         // Particle
         for (i++; i < lines.length; i++) {
@@ -4831,9 +3297,9 @@ class LanguageTr {
 
             let item = ItemAdverb.Load(line);
             if (item !== null && item !== undefined) this.Particles.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Particle' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Particle' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Particles", this.Particles);
+        if (fullDev) console.log("Loaded Particles", this.Particles);
 
         // Interjection
         for (i++; i < lines.length; i++) {
@@ -4842,9 +3308,9 @@ class LanguageTr {
 
             let item = ItemAdverb.Load(line);
             if (item !== null && item !== undefined) this.Interjections.push(item);
-            else if (dev) console.log("⚠️ Cannot load 'Interjection' item at line " + i, line);
+            else if (dev) console.warn("Cannot load 'Interjection' item at line " + i, line);
         }
-        if (fullDev) console.log("🔣 Loaded Interjections", this.Interjections);
+        if (fullDev) console.log("Loaded Interjections", this.Interjections);
 
 
         this.ReplaceE.sort((a, b) => (a.input.length < b.input.length) ? 1 : -1);
@@ -5091,20 +3557,14 @@ class LanguageTr {
         return display;
     }
 
-    Translate(input, htmlFancyOut) {
-        this.qualityTrTotalTranslatedWell = 0;
-        this.qualityTrTotalTranslated = 0;
-        this.html = htmlFancyOut;
-        this.htmlCodeTranslate=true;
-
-        PrepareReplaceRules();
+    Translate(input) {
+        //this.htmlCodeTranslate=true;
 
         if (dev) console.log("📝 Translating " + this.Name + "...");
 
-        let output = document.createElement("div");
         let stringOutput = "";
 
-        let sentences = this.SplitStringTags(input,".!?", true);//this.SplitSentences(input, ".!?");
+        let sentences = this.SplitStringTags(input,".!?", true);
 
         for (let i = 0; i < sentences.length; i++) {
             let currentSentenceS = sentences[i];
@@ -5115,9 +3575,9 @@ class LanguageTr {
             if (dev) console.log("📘 \x1b[1m\x1b[34mCurrent Sentence: ", currentSentence);
 
             if (isTag) {
-                this.AddText(currentSentence, output, "tag");
+                stringOutput+=currentSentence;
                 continue;
-            }/**/
+            }
 
             // Add . ? !
             //	if (!currentSentenceS[0]) {
@@ -5132,7 +3592,7 @@ class LanguageTr {
             // Simple replece full sentences
             let m = this.matchSentence(currentSentence);
             if (m !== null) {
-                this.AddText(m.output, output, "sentence");
+                this.AddText(m.output);
                 continue;
             }
 
@@ -5339,7 +3799,7 @@ class LanguageTr {
                     printableString = string.output[0].Text;
                 } else if (type == "Phrase") {
                     if (Array.isArray(string)) printableString = string[0].Text.join(" ");
-                    else printableString = string.Text.join(" ") /*.output*/ ;
+                    else printableString = string.Text.join(" ");
                 } else if (type == "Particle") {
                     printableString = string.output[0].Text;
                 } else if (type == "Interjection") {
@@ -5399,55 +3859,14 @@ class LanguageTr {
                     retText = resStr;
                 }
 
-                stringOutput += this.AddText(retText, output, type);
-
-                //	this.AddText(word, output, "numberLetters");
+                stringOutput += this.AddText(retText);
             }
-            if (this.html) {
-                let space = document.createTextNode(" ");
-                output.appendChild(space);
-            } else stringOutput += " ";
+            stringOutput += " ";
         }
-        if (this.html) {
-            let quality = (Math.round((this.qualityTrTotalTranslatedWell / this.qualityTrTotalTranslated) * 100)).toString();
-            if (quality == "100") quality = "99";
-            else if (quality.length == 1) quality = "0" + quality;
-            else if (quality == "NaN") quality = "?";
-            document.getElementById("translateWellLevel").innerText = "Q" + quality;
-        }
-        if (this.html) return output;
-        else return stringOutput;
+
+        return stringOutput;
     }
-
-    CalcSimilarity(text) {
-        let same=0, notsame=0,maybe=0;
-        // text = nářeční
-
-        for (let word in sentence) {
-            // search
-            for (let s in SimpleWords) {
-                for (let si in s.output) {
-                    if (si==word) {
-                        same++;
-                        continue;
-                    }
-                }
-            }
-
-            // try reverse replace
-            //maybe++;
-            //continue;
-
-            //unknown
-            notsame++;
-        }
-
-        total=notsame+maybe+same;
-
-        // ještě vyřešit aby to nebylo závislé podle velikosti slovníku
-        return (same+maybe*0.7)/total;
-    }
-
+    
     normalizeSymbols(symbol) {
         // Správné uvozovky
         if (symbol == '"') return '“';
@@ -5905,7 +4324,7 @@ class LanguageTr {
             let ele = document.createElement("span");
             for (let out of pattern.output) {
                 if (typeof out === 'string') {
-                    this.AddText(out, ele, "sentence");
+                    this.AddText(out);
                 } else {
                     let final = linkedRules[r][1];
                     if (final == null) {
@@ -5913,7 +4332,7 @@ class LanguageTr {
                         if (dev) console.log("Nepovedlo se detekování slova ve větě", pattern.output, linkedRules[r]);
                         break;
                     }
-                    this.AddText(final, ele, "rule");
+                    this.AddText(final);
                     r++;
                 }
             }
@@ -5966,51 +4385,12 @@ class LanguageTr {
         return null;
     }
 
-    AddText(x, parentElement, className) {
-
+    AddText(x) {
         if (typeof x === "string") {
-            if (!this.html) return ApplyPostRules(x);
-            else this.AddTextOne(x, parentElement, className);
-            return;
+            return ApplyPostRules(x);
         }
         if (Array.isArray(x)) {
-            if (!this.html) return ApplyPostRules(x[0]);
-            let earr = [];
-            // Remove more info
-            for (let i of x) {
-                if (Array.isArray(i)) {
-                    earr.push(i[0]);
-                } else earr.push(i);
-            }
-
-            // Remove dup
-            let sarr = [];
-            for (let a of earr) {
-                let exists = false;
-
-                for (let s of sarr) {
-                    if (s == a) {
-                        exists = true;
-                        break;
-                    }
-                }
-                if (!exists) {
-                    sarr.push(a);
-                }
-            }
-            if (this.html) {
-                if (sarr.length == 1) {
-                    this.AddTextOne(sarr[0], parentElement, className);
-                    return;
-                }
-
-                this.AddTextMultiple(sarr, parentElement, className);
-            } else {
-                let v = ApplyPostRules(sarr[0]);
-                //	if (v.includes("v")) console.log("!!transc", sarr,v);
-                return v;
-            }
-            return;
+            return ApplyPostRules(x[0]);
         }
     }
 
@@ -6058,24 +4438,11 @@ class LanguageTr {
     }
 
     AddTextOne(string, parentElement, className) {
-        //	if (this.html) {
         let span = document.createElement("span");
         span.innerText = ApplyPostRules(string);
         if (styleOutput) span.className = className;
-        parentElement.appendChild(span);
-        //}else{
-        //	parentElement+=ApplyPostRules(string);
-        //}
+        parentElement.appendChild(span);      
     }
-
-    /*AddSymbol(symbol, parentElement) {
-    	if (this.html){
-    		let node = document.createTextNode(symbol);
-    		parentElement.appendChild(node);
-    	}else{
-    		parentElement+=symbol;
-    	}
-    }*/
 
     AddTextMultiple(variants, parentElement, className) {
         //if (this.html){
@@ -6234,7 +4601,7 @@ class LanguageTr {
             // tag
             if (ignoreTags) {
                 let tagStartPos=workingString.indexOf(tagStart);
-                console.log(tagStartPos);
+
                 if (tagStartPos<=sMin || sMin<0) {
                     let toEnd=workingString.substring(tagStartPos);
                     let endTagPos=toEnd.indexOf(tagEnd);
@@ -6442,7 +4809,7 @@ class LanguageTr {
         }
     }
 
-    BuildSelect(rawStr) {
+    /*BuildSelect(rawStr) {
         if (rawStr == "") return [];
 
         let arr = [];
@@ -6457,7 +4824,7 @@ class LanguageTr {
             }
             this.SelectReplace = sel.Replaces = arr;
         }
-    }
+    }*/
 
     // přeložit text s daným slovem, které má speciální vlatnosti
     CustomWord(str) {
@@ -6721,50 +5088,6 @@ class LanguageTr {
     }
 }
 
-class Selector {
-    constructor() {
-        this.Name = "";
-        this.Replaces = [];
-    }
-}
-// By custom defined in lang from select
-
-function PrepareReplaceRules() {
-    SimplyfiedReplacedRules = [];
-
-    let list = document.getElementById("optionsSelect");
-
-    for (let l of list.childNodes) {
-        if (l.tagName == "select") {
-            let replaceRule = this.SelectReplace[l.languageselectindex];
-            let search = replaceRule[0];
-            let replace = l.value;
-            if (replace == search) continue;
-            SimplyfiedReplacedRules.push([search, replace]);
-        }
-    }
-}
-
-// Vytvoření volitelností
-function CustomChoosenReplacesCreate() {
-    let area = document.getElementById("optionsSelect");
-    area.innerHTML = "";
-
-    for (const rule of currentLang.SelectReplace) {
-        let select = document.createElement("select");
-        select.name = rule.Name;
-
-        for (const v of rule.Replaces) {
-            let option = document.createElement("option");
-            option.value = v;
-            option.innerText = v;
-            select.appendChild(option);
-        }
-        area.appendChild(select);
-    }
-
-}
-
 function ApplyPostRules(text) {
     //	let ret=text;
     if (typeof text === "string") return ApplyTranscription(text);
@@ -6873,6 +5196,7 @@ function ApplyTranscription(str) {
         } else {
             let ind = -1;
             for (let i = 0; i < 10; i++) {
+                //if (g.from=="ṵ" && ret.includes(g.from)) console.log("g.from", g, ret, ret.includes(g.from),PatternAlrearyReplaced);
                 if (ret.includes(g.from)) {
                     let startOfReplace;
                     if (ind > 0) {
@@ -6880,8 +5204,9 @@ function ApplyTranscription(str) {
                     } else startOfReplace = str.indexOf(g.from);
                     ind = startOfReplace;
 
-                    // Pokuď néni obsazene
+                    // Pokaď néni obsazene
                     let doReplace = true;
+                    //  console.log("g.from", g.from, g);
                     for (let i = startOfReplace; i < g.from.length; i++) {
                         if (PatternAlrearyReplaced[i] != "o") {
                             doReplace = false;
@@ -6933,44 +5258,6 @@ function LoadArr(rawArr, len, start) {
     return arr;
 }
 
-function mapper_link(input, filter){
-    let img = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    img.classList="mapperBtn";
-    img.addEventListener("click", function(){
-        mapper_open(input, filter);
-    });
-    img.setAttribute("viewBox","0 0 60 60");
-
-    let path=document.createElementNS("http://www.w3.org/2000/svg", 'path');
-    path.setAttribute("d", "M15.8.6C10 .5 3.9 3.7 1.7 9.3c-1.1 2.4-.6 5.2-.8 7.8l-.1 32.4a40.3 40.3 0 0124.5-13C22 31 20 24.8 17.9 18.8 13.7 5.2 19 2.7 19.2 1a10 10 0 00-3.4-.4Zm45.6 1a30.5 30.5 0 01-16 6.4 45 45 0 01-21-4.9c-2.3 1-3.4 6.8-3.3 8.7 4.6 1.5 18.3 4.3 40.4 13V1.6ZM22 16.2a56 56 0 0010.8 23.2c2.6 2.6 5.5 5.5 9.3 6.3 3 .3 5.6-1.2 8.1-2.5 4.1-2.2 7.8-5.1 11.3-8.1v-5.7C48.4 25.8 35.2 19.7 22 16.2Zm6 24.2c-4.9 1-9.8 1.8-14.2 4-4.5 2.8-10.7 8-13 10.7l.1 3.8c8-3.3 16.9-5 25.4-3.1 7.6 1.4 15 4.6 23 3.4 5.3-.9 10.8-4.5 12.3-10 .3-2.8 0-6.5 0-9.3-5 4.1-12 8.5-18.6 9-7.2-.3-13.5-8-14.9-9.7z");
-    img.appendChild(path);
-
-    lastAppMapper="dic";
-
-    return img;
+function isNumber(num) {
+    return !isNaN(num);
 }
-
-/*
-function GenerateSupCite(source) {
-    // Check
-    if (source == undefined) return [];
-    if (source == "") return [];
-
-    // arr of string
-    let arrCite=[];
-    if (source.includes(",")) arrCite=source.split(",");
-    else arrCite=[source];
-
-    // arr of elements
-    let sp=[];
-    for (let ci of arrCite) {
-        let c = document.createElement("sup");
-        c.innerText = "["+ci+"]";
-        c.className = "reference";
-        c.addEventListener("click", (e) => {
-            ShowCite(ci);
-        });
-        sp.push(c);        
-    }
-    return sp;   
-}*/

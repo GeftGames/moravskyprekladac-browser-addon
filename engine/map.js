@@ -1,5 +1,5 @@
-var map_Zoom = 1;
-var map_LocX = 0,
+var map_Zoom = .34;
+var map_LocX = 17,
     map_LocY = 0;
 var map_LocX2 = 0,
     map_LocY2 = 0;
@@ -78,7 +78,6 @@ function LoadMap(){
     mapSelectLang.addEventListener('mousemove', (e) => {
         e.preventDefault();
         if (moved) {
-            //	console.log('moved');
             map_LocX = e.clientX - map_LocTmpX;
             map_LocY = e.clientY - map_LocTmpY;
 			
