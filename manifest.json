@@ -26,9 +26,10 @@
     {
       "resources": [
         "data/popup.css",
-        "engine/map.js",
         "data/popup.js",
+        "data/langs.js",
         "engine/v3.trw_a",
+        "engine/map.js",
         "../data/images/map.svg"
       ],
       "matches": [
@@ -60,6 +61,7 @@
     "contextMenus",
     "scripting",
     "storage",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "idle"
   ]
 }
