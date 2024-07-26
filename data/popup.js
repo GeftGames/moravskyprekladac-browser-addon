@@ -1,7 +1,7 @@
 var dev=true;
 var languagesList=[]; // for map
 
-let selectedLang, 
+var selectedLang, 
     autoTranslate, 
     transcription, 
     translateAreas,
@@ -10,15 +10,16 @@ let selectedLang,
     themeColor,
     theme,
     activated,
-    langs,
+    langsInSelect,
     liveSubTitles,
     mouseContext,
-
+    translateMethod,
     currentPageRule,
+    currentDomainRule,
     
     statePopUp="loading"; // Loading,...
 
-// Load
+// Load popup page
 document.addEventListener('DOMContentLoaded', function() {
     // register receiveing info
     receviederHandler();
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // changed language of current page
     document.getElementById("settingCurrentLang").addEventListener('click', function() {
         let lang=document.getElementById("settingCurrentLang").value;
-        selectedLang=lang;
+        selectedLang=parseInt(lang);
         SendChangedSettings();
     });
 
@@ -37,8 +38,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("settingPageRule").addEventListener('click', function() {
         let rule=document.getElementById("settingPageRule").checked;
         currentPageRule=rule;
-        SendChangedSettings();
+        PageRule();
     });
+
+    // changed rule of translating of current page
+    /*document.getElementById("textThisPageRuleDomain").addEventListener('click', function() {
+        let rule=document.getElementById("textThisPageRuleDomain").checked;
+        currentDomainRule=rule;
+        PageRule();
+    });*/
     
     // --- More settings --- //
 
@@ -96,10 +104,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // live subs
-    document.getElementById("settingsLiveSubs").addEventListener('click', function() {
+    /*document.getElementById("settingsLiveSubs").addEventListener('click', function() {
         let rule=document.getElementById("settingsLiveSubs").checked;
         liveSubTitles=rule;
         console.log("Set active to", liveSubTitles);
+        SendChangedSettings();
+    });*/
+
+    // live subs
+    document.getElementById("settingsDefaultRule").addEventListener('click', function() {
+        let rule=document.getElementById("settingsDefaultRule").checked;
+        defaultRule=rule;
         SendChangedSettings();
     });
 
@@ -110,18 +125,35 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("mouseContext to", mouseContext);
         SendChangedSettings();
     });
+
+    // system lang
+    document.getElementById("settingSystemLang").addEventListener('click', function() {
+        let rule=document.getElementById("settingSystemLang").value;
+        systemLang=rule;
+        SetLangTexts();
+        SendChangedSettings();
+    });
+
+    // Translate method
+    document.getElementById("settingsTranslateMethod").addEventListener('click', function() {
+        let rule=document.getElementById("settingsTranslateMethod").value;
+        translateMethod=rule;
+        SendChangedSettings();
+    });
     
     
     // Add bts events
-    document.getElementById("btmMoreSettings").addEventListener('click', function() {SwitchPage("MoreSettings")});
-    document.getElementById("btnShowMap").addEventListener('click', function() {SwitchPage("Map")});
-    document.getElementById("btnGoBack").addEventListener('click', function() {SwitchPage("Basic")});
-    document.getElementById("btnGoBack2").addEventListener('click', function() {SwitchPage("Basic")});
+    document.getElementById("btmSettings").addEventListener('click', function() {SwitchPage("Settings")});
+    document.getElementById("btnShowMap" ).addEventListener('click', function() {SwitchPage("Map")});
+    document.getElementById("btnGoBack"  ).addEventListener('click', function() {SwitchPage("Basic")});
+    document.getElementById("btnGoBack2" ).addEventListener('click', function() {SwitchPage("Basic")});
 });
 
 // Apply loaded settings
 function ApplySettings(){
     document.getElementById("settingPageRule").checked=currentPageRule;
+   // document.getElementById("settingDomainRule").checked=currentDomainRule;
+   console.log("selectedLang",selectedLang);
     document.getElementById("settingCurrentLang").value=selectedLang;
     // >>> selected map point
 
@@ -131,7 +163,11 @@ function ApplySettings(){
     document.getElementById("settingAutoTranslate").checked=autoTranslate;
     document.getElementById("settingAreas").checked=translateAreas;
     document.getElementById("settingAlltranslation").checked=allTranslates;
-    document.getElementById("settingTranscription").checked=transcription;
+    document.getElementById("settingTranscription").value=transcription;
+    document.getElementById("settingsMouseContex").value=mouseContext;
+    document.getElementById("settingsDefaultRule").checked=defaultRule;
+    
+    document.getElementById("settingsTranslateMethod").value=translateMethod;
 
     document.getElementById("settingColor").value=themeColor;
     document.getElementById("settingSystemLang").value=systemLang;
@@ -141,7 +177,7 @@ function ApplySettings(){
 }
 
 // Switch page
-const pages=["Loading", "Basic", "Map", "MoreSettings"];
+const pages=["Loading", "Basic", "Map", "Settings"];
 let lastPage="Loading";
 
 function SwitchPage(newPage) {
@@ -165,12 +201,13 @@ function LoadSettings(json) {
     allTranslates=json.AllTranslates;
     translateAreas=json.TranslateAreas;
     themeColor=json.ThemeColor;
+    translateMethod=json.TranslateMethod;
     systemLang=json.SystemLang;
     theme=json.Theme;
     activated=json.Activated;
-    currentPageRule=json.CurrentPageRule;
-
-    //langs=json.Langs;
+    //liveSubTitles=json.LiveSubTitles;
+    mouseContext=json.MouseContext;
+    defaultRule=json.DefaultRule;
 }
 
 // Get settings from background page
@@ -186,17 +223,19 @@ function GetSettings() {
 
 // Send settings to background page
 function SendChangedSettings() {
-    //var port = chrome.extension.connect({ name: "Set Settings" });
-
     let json={};
     json.SelectedLang =selectedLang;
     json.AutoTranslate=autoTranslate;
     json.Transcription=transcription;
     json.AllTranslates=allTranslates;
+    json.TranslateMethod=translateMethod;
     json.Theme=theme;
     json.ThemeColor=themeColor;
     json.SystemLang=systemLang;
     json.Activated=activated;
+    json.MouseContext=mouseContext;
+    //json.LiveSubTitles=liveSubTitles;
+    json.DefaultRule=defaultRule;
 
     chrome.runtime.sendMessage({
         command: "settings_set",
@@ -208,10 +247,11 @@ function SendChangedSettings() {
 
 // set list of lang
 function SetLangs(arr_angs) {
-    langs=arr_angs;
-    if (dev) console.log("Setting langs", langs);
+    if (arr_angs==undefined) console.error("data.Langs is undefined!");
+    langsInSelect=arr_angs.items;
+    if (dev) console.log("Setting langs", langsInSelect);
     let select=document.getElementById("settingCurrentLang");
-    SetGroup(langs, select);
+    SetGroup(langsInSelect, select);
 
     function SetGroup(arr, parent) {
         for (let item of arr) {
@@ -219,8 +259,11 @@ function SetLangs(arr_angs) {
                 let optgroup=document.createElement("optgroup");
                 optgroup.label=item.Name;
                 parent.appendChild(optgroup);
-
-                SetGroup(item.items, optgroup);
+                if (item.items!=undefined) {
+                    if (item.items.length>0) {
+                        SetGroup(item.items, optgroup);
+                    }
+                }
             } else {
                 let option=document.createElement("option");
                 option.innerText=item.Name;
@@ -235,21 +278,39 @@ function receviederHandler() {
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         console.log("Recevieded", request);
         if (request.receiver == "popup") {
+            let data=request.data;
             if (request.command === "settings_set_popup") {
-                LoadSettings(request.data);
-                statePopUp="loaded";
-                SetLangs(request.data.Langs);
-                ApplySettings();
-                SwitchPage("Basic");
+                Load(data);
             }
             if (request.command === "loading") {
-                document.getElementById("progness").width=data.Progress;
-                if (data.State==-1) document.getElementById("textDownloadingList").innerText="Inicializace...";
+                document.getElementById("progness").width=data.Progress+"px";
+                console.log(data.Progress);
+                if (data.State==-1) document.getElementById("textDownloadingList").innerText="Inicializace";
                 else if (data.State==0) document.getElementById("textDownloadingList").innerText="Načítání...";
-                else if (data.State==1) document.getElementById("textDownloadingList").innerText="Dokončování...";
+                else if (data.State==1) {
+                    document.getElementById("textDownloadingList").innerText="Načítání";
+                    GetSettings();
+                }
+            }
+            if (request.command === "pagerule") {
+                currentPageRule=data.pageRule;
+                //currentDomainRule=data.domainRule;
+                currentUrl=data.url;
+
+                document.getElementById("settingPageRule").checked=currentPageRule;
             }
         }
     });
+}
+
+// After inicialized and loaded service-wrker
+function Load(data) {
+    statePopUp="loaded";
+    SwitchPage("Basic");
+    SetLangs(data.Langs);
+    LoadSettings(data);
+    ApplySettings();
+    SetLangTexts();
 }
 
 function SetThemeColors(){
@@ -302,3 +363,81 @@ function SetThemeColors(){
     }
 }
 
+function PageRule(){
+    chrome.tabs.query({active:true, currentWindow:true}, function(tab) {
+        //Be aware that `tab` is an array of Tabs 
+        let currentUrl=tab[0].url;
+
+        chrome.runtime.sendMessage({
+            command: "pagerule_set",
+            sender: "popup",
+            receiver: "background",
+            data: {
+                url: currentUrl,
+                pageRule: currentPageRule,
+               // domainRule: currentDomainRule
+            },
+        })
+    });
+}
+
+function SetLangTexts() {
+    let langCode=systemLang;
+    if (langCode=="default" || langCode==undefined) {
+        const arrOfAceptedLangs = ["cs", "cs-CZ", "sk", "sk-SK", "pl", "pl-PL", "jp", "jp-JP", "de", "de-DE", "en-GB", "en-US"];
+        for (let clientLang of navigator.language) {
+            for (let a of arrOfAceptedLangs) {
+                if (a.includes(clientLang)) {
+                    if (a.length==2) langCode=a;
+                    else langCode=a.substring(0,2);
+                    break;
+                }
+            }
+            if (langCode!="default" || langCode==undefined) break;
+        }
+    }
+    if (langCode=="default" || langCode==undefined) langCode="en";
+    let langsInFile=langs[systemLang];
+    if (langsInFile==undefined) {
+        console.warn("Unknown language", systemLang);
+        return;
+    }
+    // <body lang="cs">
+    document.body.lang=langsInFile.Code;
+
+    document.getElementById("headerTitle").innerText=langsInFile.TranslatorCM;
+    document.getElementById("trBitSlz").innerText=langsInFile.BitSlz;
+    document.getElementById("forWeb").innerText=langsInFile.ForWeb;
+    document.getElementById("chooseFromMap").innerText=langsInFile.ChooseFromMap;
+    document.getElementById("btnGoBack").innerText=langsInFile.GoBack;
+    document.getElementById("btnGoBack2").innerText=langsInFile.GoBack;
+    document.getElementById("textTranscription").innerText=langsInFile.Transcription;
+    document.getElementById("textAutoTranslate").innerText=langsInFile.AutoTranslate;
+    document.getElementById("textTypeOfTranslate").innerText=langsInFile.TypeOfTranslate;
+    document.getElementById("textDefaultType").innerText=langsInFile.Default;
+    document.getElementById("textDefaultType2").innerText=langsInFile.Default;
+    document.getElementById("textDefaultArea").innerText=langsInFile.Default;
+    document.getElementById("textMouseContext").innerText=langsInFile.MouseContext;
+    document.getElementById("textTranslateSelectedText").innerText=langsInFile.TranslateSelectedText;
+    document.getElementById("textLiveSubs").innerText=langsInFile.LiveSubs;
+    document.getElementById("textSupportsLiveSubs").innerText=langsInFile.LiveSubsSupport;
+    document.getElementById("textAllTranslates").innerText=langsInFile.AllTranslates;
+    document.getElementById("textEvenBadOnes").innerText=langsInFile.EvenBadOnes;
+    document.getElementById("textThemeColor").innerText=langsInFile.Color;
+    document.getElementById("textTheme").innerText=langsInFile.Theme;
+    document.getElementById("textLanguage").innerText=langsInFile.Language;
+    document.getElementById("textAbout").innerText=langsInFile.About;
+    document.getElementById("textSystem").innerText=langsInFile.System;
+    document.getElementById("textArea").innerText=langsInFile.Area;
+    document.getElementById("textMoreAboutAreas").innerText=langsInFile.MoreAboutAreas;
+    document.getElementById("btmSettings").innerText=langsInFile.Settings;
+    document.getElementById("textFrom").innerText=langsInFile.From;
+    document.getElementById("textThisPageRule").innerText=langsInFile.ThisPageRule;
+    document.getElementById("textDark").innerText=langsInFile.Dark;
+    document.getElementById("textLight").innerText=langsInFile.Light;
+    document.getElementById("textSemi").innerText=langsInFile.Semi;
+    document.getElementById("textShow").innerText=langsInFile.Show;
+    document.getElementById("textGlobalEnabled").innerText=langsInFile.GlobalEnabled;
+    document.getElementById("textCyrillic").innerText=langsInFile.Cyrillic;
+    document.getElementById("textIpa").innerText=langsInFile.Ipa;
+}
