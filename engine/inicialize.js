@@ -117,6 +117,15 @@ function translator_init() {
 let totalDirFiles = -1;
 let downloadedFiles = 0;
 
+var sSimpleWord=[], sPhrase=[], sSentence=[], sSentencePart=[], sSentencePattern=[],sSentencePatternPart=[],
+sReplaceS=[], sReplaceG=[], sReplaceE=[],
+sPatternNounFrom=[], sPatternNounTo=[],
+sPatternAdjectiveFrom=[],sPatternAdjectiveTo=[],
+sPatternPronounFrom=[],sPatternPronounTo=[],
+sPatternNumberFrom=[],sPatternNumberTo=[],
+sPatternVerbFrom=[],sPatternVerbTo=[],
+sAdverb=[],sPreposition=[],sConjunction=[],sParticle=[],sInterjection=[];
+
 function GetTranslations() {
    // loadedLangs=0;
     
@@ -135,9 +144,8 @@ function GetTranslations() {
        // tr.fileName = fileName;
         tr.id=id;
 
-        
         tr.Load(lines);
-        AddLang(tr);
+        if (tr.Name!='Moravština "spisovná"') AddLang(tr);
        // console.log(tr.Name);
     }   
     
@@ -166,7 +174,7 @@ function GetTranslations() {
                 let name = lang.Name;
   
                 if (lang.Quality > 2) name += " ✅";
-                if (stats == 0) name += " 💩";
+                if (stats < 10) name += " 💩";
 
                 languagesList.push(lang);
 
@@ -206,7 +214,7 @@ function GetTranslations() {
                 } else { lang.ColorFillStyle = "Black"; }
 
                 let nodeLang = {
-                    Id: lang.id,
+                    id: lang.id,
                     Name: lang.Name,
                     type: "Option"
                 };
@@ -219,6 +227,55 @@ function GetTranslations() {
         }
     }
 
+    function loadLangFile(fileText) {
+        const delimiter = '§'
+        let fileContents = fileText.split(delimiter);
+
+        // Same lines
+        let lines=fileContents[0].split('\n');
+        let lineNumber=1;
+        sSimpleWord=loadShortcuts(lines, lineNumber);
+        sPhrase=loadShortcuts(lines, lineNumber);
+        sSentence=loadShortcuts(lines, lineNumber);
+        sSentencePart=loadShortcuts(lines, lineNumber);
+        sSentencePattern=loadShortcuts(lines, lineNumber);
+        sSentencePatternPart=loadShortcuts(lines, lineNumber);
+        sReplaceS=loadShortcuts(lines, lineNumber);
+        sReplaceG=loadShortcuts(lines, lineNumber);
+        sReplaceE=loadShortcuts(lines, lineNumber);
+        sPatternNounFrom=loadShortcuts(lines, lineNumber);
+        sPatternNounTo=loadShortcuts(lines, lineNumber);
+        sPatternAdjectiveFrom=loadShortcuts(lines, lineNumber);
+        sPatternAdjectiveTo=loadShortcuts(lines, lineNumber);
+        sPatternPronounFrom=loadShortcuts(lines, lineNumber);
+        sPatternPronounTo=loadShortcuts(lines, lineNumber);
+        sPatternNumberFrom=loadShortcuts(lines, lineNumber);
+        sPatternNumberTo=loadShortcuts(lines, lineNumber);
+        sPatternVerbFrom=loadShortcuts(lines, lineNumber);
+        sPatternVerbTo=loadShortcuts(lines, lineNumber);
+        sAdverb=loadShortcuts(lines, lineNumber);
+        sPreposition=loadShortcuts(lines, lineNumber);
+        sConjunction=loadShortcuts(lines, lineNumber);
+        sParticle=loadShortcuts(lines, lineNumber);
+        sInterjection=loadShortcuts(lines, lineNumber);
+
+        // Po souborech
+        for (let i = 1; i < fileContents.length; i++) {
+            let fileText = fileContents[i];
+            /*if (typeof fileText === 'string' || fileText instanceof String)*/ RegisterLang(fileText, i);
+        }        
+    
+        function loadShortcuts(lines, start) {
+            let listShortcuts=[];
+            for (let i=start; i<lines.length; i++) {
+                let line=lines[i];
+                lineNumber++;
+                if (line=="-") return listShortcuts;
+                listShortcuts.push({id: i-start, data: line});
+            }
+            return listShortcuts;
+        }
+    }
 
     // Usage example
     fetchWithProgress(chrome.runtime.getURL(languagesPackage), (loaded, total) => {
@@ -229,7 +286,7 @@ function GetTranslations() {
     }).then(data => {
        // console.log('Fetched data:', data);
           // ovření kalibrace mapy
-        if (false) {
+        /*if (false) {
             let handlova = new LanguageTr();
             handlova.Load("TW v0.1\ntHandlova\ncTesting point\ng48.7283153,18.7590888\nq=5".split('\n'));
             AddLang(handlova);
@@ -237,8 +294,10 @@ function GetTranslations() {
             let nymburk = new LanguageTr();
             nymburk.Load("TW v0.1\ntNymburk\ncTesting point\ng50.1856607,15.0428904\nq=5".split('\n'));
             AddLang(nymburk);
-        }
+        }*/
 
+        loadLangFile(data);
+        /*
         const delimiter = '§'
         let fileContents = data.split(delimiter);
 
@@ -248,7 +307,7 @@ function GetTranslations() {
                 fileText = fileContents[i + 1];
 
             if (typeof fileText === 'string' || fileText instanceof String) RegisterLang(fileText, i/2);
-        }
+        }*/
         
         setTimeout(function() {
             progressLoading=1;
