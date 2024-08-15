@@ -1,0 +1,12 @@
+Name: 
+Moravský překladač
+
+short description: 
+Překložení webových stránek do moravského jazyka
+
+description: 
+Přelož si stránku do moravského jazyka. Je na výběr obecná moravská nářečí - hanáčtina, slováčtina, valaština, ... nebo i do místních nářečí.
+Berte ohled na to, že ně některé překlady nejsou úplně kvalitní, zatím se jedná o ranou verzi, chcete-li překlady vylepšit, pošlete slova, texty na https://moravskyprekladac.pages.dev/.
+Github: https://github.com/GeftGames/moravskyprekladac.web/
+Webová verze: https://moravskyprekladac.pages.dev/
+
