@@ -11,8 +11,6 @@
 ## Popis
 - Doplněk do prohlížeče přeloží webovou stránku do nářečí (nebo jiného typu překladu)
 - umí přeložit označený text
-- živě překládat titulky na Youtube
-- Analytika a cookies nejsou, doplněk je transparentní
 
 ## Poznámky
 - [Licence](https://github.com/GeftGames/moravskyprekladac.web/blob/main/LICENSE)
