@@ -57,9 +57,16 @@
 				
 				<div style="display: flex;">
 					<span data-tooltip="Vybrat místo z mapy" style="width: fit-content; height: fit-content;" class="butIc tooltipC" rel="nofollow" id="btnShowMap">
-						<svg class="ib" style="width: 31px; height: 31px" viewBox="0 0 50 75"><path d="m25 75c0 0 25-35 25-50 0-14-12-25-25-25-13 0-25 11-25 25 0 16 25 50 25 50zm0-63m-13 13c0-7 6-13 13-13 8 0 13 7 13 13 0 7-6 13-13 13-7 0-13-6-13-13z"></path></svg>
+						<svg class="ib" style="width: 31px; height: 31px" viewbox="0 0 50 75"><path d="m25 75c0 0 25-35 25-50 0-14-12-25-25-25-13 0-25 11-25 25 0 16 25 50 25 50zm0-63m-13 13c0-7 6-13 13-13 8 0 13 7 13 13 0 7-6 13-13 13-7 0-13-6-13-13z"></path></svg>
 					</span>
 				</div>
+			</div>
+
+			<div class="settingItem" id="refreshPage" style="display: none;justify-content: center;align-items: center;flex-direction: column;">
+				<span class="butIc tooltipC" id="btnRefreshPage">
+					<svg class="ib" style="height: 24px; height:24px" viewbox="0 0 24 24"><path d="M 7 9h -7 v -7h 1v 5.2c 1.9 -4.2 6.1 -7.2 11 -7.2c 6.6 0 12 5.4 12 12s -5.4 12 -12 12c -6.3 0 -11.4 -4.8 -12 -11h 1c 0.5 5.6 5.2 10 11 10c 6.1 0 11 -4.9 11 -11s -4.9 -11 -11 -11c -4.7 0 -8.6 2.9 -10.2 7h 5.2v 1z"/></svg>
+				</span>
+				<p style="display: flex;flex-direction: column;margin-top: 0px;"><span>Aktualizovat stránku</span><span>a aplikovat nastavení</span></p>
 			</div>
 				
 			<!-- Další nastavení -->
@@ -155,9 +162,19 @@
 						<option value="simpleDimpleReplace">simpleDimpleReplace</option>
 					</select>
 				</div>
+	
+				<div class="settingItem">
+					<p>
+						<span id="textMouseContext">Překlát pouze české stránky</span>
+						<!--<span class="moreinfo" id="textTranslateSelectedText">Označený text přeložit</span>-->
+					</p>
 
-				<hr>
-
+					<label class="switch">
+						<input type="checkbox" id="settingsTranslateOnlyCSSites" checked>
+						<span class="slider round"></span>
+					</label>
+				</div>
+				
 				<div class="settingItem">
 					<p>
 						<span id="textMouseContext">Z menu myši</span>
@@ -169,6 +186,8 @@
 						<span class="slider round"></span>
 					</label>
 				</div>
+
+			
 
 				<!--<div class="settingItem">
 					<p>

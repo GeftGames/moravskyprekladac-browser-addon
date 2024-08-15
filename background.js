@@ -26,6 +26,7 @@ var
     systemLang="default",
     theme="default",
     translateMethod="default",
+    translateOnlyCSSites=true,
     themeColor=210;
 
 //#region Main events
@@ -65,10 +66,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     SendPageRule();
                 }
             } 
+           /* if (command=="refreshpage"){
+
+            }*/
             if (command=="settings_set") {
                 if (loadedLangs==1) {
+                    let activatedBefore=activated;
                     SetSettingsFromPopup(data);
                     SaveSettings();
+
+                    let allTabs=activated && !activatedBefore;
+                    SendContentSetting(undefined, allTabs);
                 }
             } 
             if (command=="setting_get_content"){
@@ -173,7 +181,8 @@ function GetJsonSettings() {
         SystemLang: systemLang,
         MouseContext: mouseContext,
        // LiveSubTitles: liveSubTitles
-        DefaultRule: defaultRule
+        DefaultRule: defaultRule,
+        TranslateOnlyCSSites: translateOnlyCSSites,
     };
 }
 
@@ -191,6 +200,7 @@ function LoadJsonSettings(json) {
     systemLang=json.SystemLang;
     translateMethod=json.TranslateMethod;
     defaultRule=json.DefaultRule;
+    translateOnlyCSSites=json.TranslateOnlyCSSites;
 }
 
 function SaveSettings() {
@@ -235,7 +245,7 @@ function LoadPageRules() {
 }
 
 // send content settings
-function SendContentSetting(url) {    
+function SendContentSetting(url, all) {    
     let json={ 
         command: "settings_cnt",
         sender: "background",
@@ -246,14 +256,20 @@ function SendContentSetting(url) {
             Activated: activated, // enable
             AutoTranslate: autoTranslate,
             PageRule: GetCurrentPageRule(url),
-            DefaultRule: defaultRule
+            DefaultRule: defaultRule,
+            TranslateOnlyCSSites: translateOnlyCSSites
         }
     };
 
     if (dev)console.log("sending setting to content", json);
     
-    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, json);
+    let filter={active: true, currentWindow: true};
+    if (all) filter={};
+    chrome.tabs.query(filter, function (tabs) {
+        tabs.forEach(tab => {
+            chrome.tabs.sendMessage(tab.id, json);
+            console.log("send refresh ",tab.url);
+        });
     });
 }
 //#endregion
@@ -351,6 +367,11 @@ function SendTranslate_textNodeId(strings, translatedTitle) {
 function SendSettings() {    
     let json=GetJsonSettings();
     json.Langs=langArrEleOptions;
+    json.LanguagesList=[];
+    for (let l of languagesList) {
+        console.log(l.gpsX);
+        if (!isNaN(l.locationX)) json.LanguagesList.push({Name: l.Name, locationX: l.locationX, locationY: l.locationY, Quality: l.Quality, id: l.id, ColorFillStyle: l.ColorFillStyle, ColorStrokeStyle: l.ColorStrokeStyle});
+    }
     chrome.runtime.sendMessage({
         command: "settings_set_popup",
         sender: "background",

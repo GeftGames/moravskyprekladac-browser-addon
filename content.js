@@ -7,7 +7,8 @@ var translatedTexts=[];
 var autoTranslate,
     activated,
     translateMethod,
-    pageRule;
+    pageRule,
+    translateOnlyCSSites;
 
 const translatePeriod=1000;
 var timerLiveTranslate=null;
@@ -56,6 +57,10 @@ function handlerMessages() {
                     window.open(data.url, '_blank').focus();
                 }
             }
+            if (request.command == 'refresh') {
+                location.reload();
+                console.log("refresh page");
+            }
            
             if (request.command == 'activated') {
                 activated=data;
@@ -99,6 +104,7 @@ function LoadSettingsCnt(data) {
     autoTranslate=data.AutoTranslate;
     pageRule=data.PageRule;
     defaultRule=data.DefaultRule;
+    translateOnlyCSSites=data.TranslateOnlyCSSites;
     if (pageRule==null) pageRule=defaultRule;
 }
 //#endregion
@@ -249,6 +255,13 @@ function ShowTranslatedText(text) {
 
 // Send need to translate
 function SendNeedToTranslate() {
+    if (translateOnlyCSSites) {
+        if (document.documentElement.lang!="cs") {
+            if (dev) console.log("This site is not in czech, it will be not translated according settings!");
+            return;
+        }
+    }
+    
     // translate all document.body and replace document.body
     if (translateMethod=="simpleDimpleAll") {
         SendNeedToTranslate_simpleDimpleAll();
