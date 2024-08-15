@@ -348,5 +348,5 @@ select option:hover {
 }
 
 .butIc:hover {
-    background-color: rgba(var(--colorForward), .25);
+    background-color: rgba(var(--colorForward), .2);
 }

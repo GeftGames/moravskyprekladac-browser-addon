@@ -1,4 +1,5 @@
 var dev=true;
+var refreshPage=false;
 var languagesList=[]; // for map
 
 var selectedLang, 
@@ -16,6 +17,7 @@ var selectedLang,
     translateMethod,
     currentPageRule,
     currentDomainRule,
+    translateOnlyCSSites,
     
     statePopUp="loading"; // Loading,...
 
@@ -28,10 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
     GetSettings();
    
     // changed language of current page
-    document.getElementById("settingCurrentLang").addEventListener('click', function() {
+    document.getElementById("settingCurrentLang").addEventListener('change', function() {
         let lang=document.getElementById("settingCurrentLang").value;
         selectedLang=parseInt(lang);
         SendChangedSettings();
+        ShowRefreshPage();
     });
 
     // changed rule of translating of current page
@@ -39,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let rule=document.getElementById("settingPageRule").checked;
         currentPageRule=rule;
         PageRule();
+        ShowRefreshPage();
     });
 
     // changed rule of translating of current page
@@ -58,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Areas of translations
-    document.getElementById("settingAreas").addEventListener('click', function() {
+    document.getElementById("settingAreas").addEventListener('change', function() {
         let rule=document.getElementById("settingAreas").value;
         translateAreas=rule;
         SendChangedSettings();
@@ -71,15 +75,23 @@ document.addEventListener('DOMContentLoaded', function() {
         SendChangedSettings();
     });
     
+    // translateOnlyCSSites
+    document.getElementById("settingsTranslateOnlyCSSites").addEventListener('click', function() {
+        let rule=document.getElementById("settingsTranslateOnlyCSSites").checked;
+        translateOnlyCSSites=rule;
+        SendChangedSettings();
+    });
+
     // transcription
-    document.getElementById("settingTranscription").addEventListener('click', function() {
+    document.getElementById("settingTranscription").addEventListener('change', function() {
         let rule=document.getElementById("settingTranscription").value;
         transcription=rule;
         SendChangedSettings();
+        ShowRefreshPage();
     }); 
     
     // theme color
-    document.getElementById("settingColor").addEventListener('click', function() {
+    document.getElementById("settingColor").addEventListener('change', function() {
         let rule=document.getElementById("settingColor").value;
         themeColor=rule;
         SendChangedSettings();
@@ -87,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // theme
-    document.getElementById("settingTheme").addEventListener('click', function() {
+    document.getElementById("settingTheme").addEventListener('change', function() {
         let rule=document.getElementById("settingTheme").value;
         theme=rule;
         SendChangedSettings();
@@ -101,6 +113,8 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Set active to" ,activated);
         SendChangedSettings();
         SetThemeColors();
+        ShowRefreshPage();
+        if (activated) GetSettings();
     });
 
     // live subs
@@ -111,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
         SendChangedSettings();
     });*/
 
-    // live subs
+    // default rule
     document.getElementById("settingsDefaultRule").addEventListener('click', function() {
         let rule=document.getElementById("settingsDefaultRule").checked;
         defaultRule=rule;
@@ -139,6 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let rule=document.getElementById("settingsTranslateMethod").value;
         translateMethod=rule;
         SendChangedSettings();
+        if (currentPageRule)ShowRefreshPage();
     });
     
     
@@ -147,7 +162,27 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("btnShowMap" ).addEventListener('click', function() {SwitchPage("Map")});
     document.getElementById("btnGoBack"  ).addEventListener('click', function() {SwitchPage("Basic")});
     document.getElementById("btnGoBack2" ).addEventListener('click', function() {SwitchPage("Basic")});
+
+    // refresh button
+    document.getElementById("btnRefreshPage" ).addEventListener('click', function() {
+        document.getElementById("refreshPage").style.display="none";
+     
+        chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                    command: "refresh",
+                    sender: "popup",
+                    receiver: "content",
+                    data: { /*url: tabs[0].url*/},
+                }
+            );
+        });
+    });
 });
+
+function ShowRefreshPage(){
+    document.getElementById("refreshPage").style.display="flex";
+    refreshPage=true;
+}
 
 // Apply loaded settings
 function ApplySettings(){
@@ -166,6 +201,7 @@ function ApplySettings(){
     document.getElementById("settingTranscription").value=transcription;
     document.getElementById("settingsMouseContex").value=mouseContext;
     document.getElementById("settingsDefaultRule").checked=defaultRule;
+    document.getElementById("settingsTranslateOnlyCSSites").checked=translateOnlyCSSites;
     
     document.getElementById("settingsTranslateMethod").value=translateMethod;
 
@@ -208,6 +244,7 @@ function LoadSettings(json) {
     //liveSubTitles=json.LiveSubTitles;
     mouseContext=json.MouseContext;
     defaultRule=json.DefaultRule;
+    translateOnlyCSSites=json.TranslateOnlyCSSites;
 }
 
 // Get settings from background page
@@ -218,7 +255,7 @@ function GetSettings() {
         sender: "popup",
         receiver: "background",
         data: {},
-    })
+    });
 }
 
 // Send settings to background page
@@ -236,6 +273,7 @@ function SendChangedSettings() {
     json.MouseContext=mouseContext;
     //json.LiveSubTitles=liveSubTitles;
     json.DefaultRule=defaultRule;
+    json.TranslateOnlyCSSites=translateOnlyCSSites;
 
     chrome.runtime.sendMessage({
         command: "settings_set",
@@ -267,7 +305,7 @@ function SetLangs(arr_angs) {
             } else {
                 let option=document.createElement("option");
                 option.innerText=item.Name;
-                option.value=item.Id;
+                option.value=item.id;
                 parent.appendChild(option);
             }    
         }
@@ -307,6 +345,7 @@ function receviederHandler() {
 function Load(data) {
     statePopUp="loaded";
     SwitchPage("Basic");
+    languagesList=data.LanguagesList;
     SetLangs(data.Langs);
     LoadSettings(data);
     ApplySettings();
