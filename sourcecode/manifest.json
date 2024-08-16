@@ -1,0 +1,74 @@
+{
+  "manifest_version": 3,
+  "name": "Translate to moravian",
+  "description": "Translating webpages into maravian language",
+  "author": "GeftGames",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "data/images/icon64.png"
+  },
+  "icons": {
+    "16": "data/images/icon16.png",
+    "64": "data/images/icon64.png",
+    "96": "data/images/icon96.png",
+    "512": "data/images/icon512.png"
+  },
+
+  "web_accessible_resources": [{
+      "resources": [
+        "images/*"
+      ],
+      "matches": [
+        "*://*/*"
+      ]
+    },
+    {
+      "resources": [
+        "data/popup.css",
+        "data/popup.js",
+        "data/langs.js",
+        "engine/v3.trw_a",
+        "engine/map.js",
+        "../data/images/map.svg"
+      ],
+      "matches": [
+        "https://example.com/*"
+      ]
+    }
+  ],
+
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": ["content.js"]
+    }
+  ],
+
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+
+  "permissions": [
+    "activeTab", 
+    "tabs", 
+    "contextMenus",
+    "scripting",
+    "storage",
+    "unlimitedStorage",
+    "idle"
+  ],
+  
+  "browser_specific_settings": {
+	  "gecko": {
+		  "id": "@geftgames.browser_extension.moravskyprekladac.web_translate"
+	  }
+	}
+}
