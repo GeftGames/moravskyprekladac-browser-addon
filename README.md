@@ -12,6 +12,7 @@
 ## Popis
 - Doplněk do prohlížeče přeloží webovou stránku do nářečí (nebo jiného typu překladu)
 - umí přeložit označený text
+- složky: *build* - finální doplněk, *sourcecode* - zdrojový kód´, *media* - obrázky a texty pro publikování
 
 ## Poznámky
 - [Licence](https://github.com/GeftGames/moravskyprekladac.web/blob/main/LICENSE)
@@ -20,8 +21,3 @@
 # moravskyprekladac.web
 ## Description
 - Translating websites via moravskyprekladac
-
-# How to try it
-## From strore
-
-## Manually
