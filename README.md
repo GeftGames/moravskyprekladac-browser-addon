@@ -7,7 +7,7 @@
 1. stáhnout složku *sourcecode* nebo .crx nebo .zip soubor v *build*
 1. Otevřít *chrome://extensions*
 2. Povolit *Režim pro vývojáře*
-3. *Načíst rozbalené* a vyhledat staženou složku (odzipovat?) doplňku NEBO přetáhnout na stánku .crx nebo .zip
+3. *Načíst rozbalené* a vyhledat staženou složku (odzipovat?) doplňku NEBO přetáhnout na stánku soubor .crx nebo .zip
 
 ## Popis
 - Doplněk do prohlížeče přeloží webovou stránku do nářečí (nebo jiného typu překladu)
