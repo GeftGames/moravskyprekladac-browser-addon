@@ -18,14 +18,17 @@ let ignoreSites=[
     "firefox:"
 ];
 
+console.log("MP!");
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') >= 0;
 if (isFirefox) {
+    console.log("firefox!");
     var chrome=browser;
 }
 
 //#region Main events
 // html loaded
 window.addEventListener("load", function() {
+    console.log("window.addEventListener load!");
     if (dev) console.log("moravskyprekladac.web showed in action!");   
     handlerMessages();
 
