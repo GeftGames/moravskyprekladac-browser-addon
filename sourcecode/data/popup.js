@@ -21,6 +21,13 @@ var selectedLang,
     
     statePopUp="loading"; // Loading,...
 
+const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+
+if (isFirefox) {
+    var chrome=browser;
+}
+
+
 // Load popup page
 document.addEventListener('DOMContentLoaded', function() {
     // register receiveing info

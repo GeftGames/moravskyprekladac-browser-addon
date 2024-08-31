@@ -1,9 +1,34 @@
-importScripts("/engine/inicialize.js");
-importScripts("/engine/translate.js");
+const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') >= 0;
+if (isFirefox) {
+    console.log("firefox");
+    var chrome=browser;
+
+    let importScripts=function(src){
+        var script = document.createElement('script');
+        script.src = src;
+        document.head.appendChild(script);
+    }
+
+    importScripts('/engine/inicialize.js');
+    importScripts('/engine/translate.js');
+}else{
+    importScripts("/engine/inicialize.js");
+    importScripts("/engine/translate.js");
+}
+
+// Keep running! otherwise loading again and again whole translations, thats it's slow
+// Code on service worker
+const pingInterval = setInterval(() => {
+    chrome.tabs.query(filter, function (tabs) {
+        tabs.forEach(tab => {
+            chrome.tabs.sendMessage(tab.id, {"status": "ping"});
+        });
+    });
+  }, 10000); // Ping every 10 seconds
 
 var langArrEleOptions={items:[]};
 var progressLoading=0;
-const fullDev=true;
+const fullDev=false;
 
 var 
     dev=true,
@@ -11,7 +36,7 @@ var
     // Page rules [Unknown=-1, Disabled=0, Enabled=1]
     pageRules=[], // item: {Rule: "0"/"1", Url: string}
     domainRules=[], // item: {Rule: "0"/"1", Url: string}
-    sendingLoading=false;
+    sendingLoading=false,
 
     // Settings
     selectedLang=0, 
@@ -65,10 +90,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     SendSettings();
                     SendPageRule();
                 }
-            } 
-           /* if (command=="refreshpage"){
-
-            }*/
+            }
             if (command=="settings_set") {
                 if (loadedLangs==1) {
                     let activatedBefore=activated;

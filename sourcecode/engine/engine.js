@@ -6,7 +6,7 @@ var error = false;
 var errorText;
 var enabletranslate = true;
 var forceTranslate = false;
-var language, autoTranslate, styleOutput, dev;
+var language, autoTranslate, styleOutput, dev=false;
 var saved = [];
 var loaded = false;
 var TranscriptionText;

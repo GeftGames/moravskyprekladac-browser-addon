@@ -18,10 +18,15 @@ let ignoreSites=[
     "firefox:"
 ];
 
+const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') >= 0;
+if (isFirefox) {
+    var chrome=browser;
+}
+
 //#region Main events
 // html loaded
 window.addEventListener("load", function() {
-    if (dev) console.log("moravskyprekladac showed in action!");   
+    if (dev) console.log("moravskyprekladac.web showed in action!");   
     handlerMessages();
 
     getSettings();
