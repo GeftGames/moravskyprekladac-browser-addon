@@ -14,9 +14,9 @@
 - umí přeložit označený text
 <img src="https://raw.githubusercontent.com/GeftGames/moravskyprekladac.web/main/media/banner.png">
 
-## Testováné na
-- Testováné na: Google Chrome 124.0.6367.78
-- Firefox-zatím nefunguje, bude nutné povolit "Přistupovat k vašim datům pro všechny webové stránky"
+## source code Testováné na
+- Google Chrome 124.0.6367.78
+- Firefox 124.0.1, nutné povolit "Přistupovat k vašim datům pro všechny webové stránky"
 
 ## Poznámky
 - [Licence](https://github.com/GeftGames/moravskyprekladac.web/blob/main/LICENSE)
