@@ -1,7 +1,8 @@
 # Moravský překladač pro web
 ## Jak vyzkoušet překladač pro web?
 ### Ze storu
-- Nainstalovat dolpněk ze storu (zatím není v žádném)
+- [Firefox Browser Add-ons](https://addons.mozilla.org/en-US/firefox/addon/moravsk%C3%BD-p%C5%99eklada%C4%8D-pro-web/)
+- Pro chromium zatím není v žádném (nainstalujet manuálně)
   
 ### Manuálně nainstalovat
 1. stáhnout složku *sourcecode* nebo .crx nebo .zip soubor v *build*
