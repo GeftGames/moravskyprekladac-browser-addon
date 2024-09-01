@@ -13,7 +13,8 @@
 ## Popis
 - Doplněk do prohlížeče přeloží webovou stránku do nářečí (nebo jiného typu překladu)
 - umí přeložit označený text
-<img src="https://raw.githubusercontent.com/GeftGames/moravskyprekladac.web/main/media/banner.png">
+
+<img src="https://raw.githubusercontent.com/GeftGames/moravskyprekladac.web/main/media/firefox.png">
 
 ## source code Testováné na
 - Google Chrome 124.0.6367.78
