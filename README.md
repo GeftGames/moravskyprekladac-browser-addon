@@ -2,7 +2,7 @@
 ## Jak vyzkoušet překladač pro web?
 ### Ze storu
 - [Firefox Browser Add-ons](https://addons.mozilla.org/en-US/firefox/addon/moravsk%C3%BD-p%C5%99eklada%C4%8D-pro-web/)
-- Pro chromium zatím není v žádném store (nainstalujet manuálně)
+- Pro chrome/edge/opera zatím není v žádném store (nainstalujte manuálně)
   
 ### Manuálně nainstalovat
 - [Popis manuální instalace](https://github.com/GeftGames/moravskyprekladac.web/wiki/Instalace)
