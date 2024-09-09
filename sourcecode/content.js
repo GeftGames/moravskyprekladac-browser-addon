@@ -28,7 +28,6 @@ if (isFirefox) {
 //#region Main events
 // html loaded
 window.addEventListener("load", function() {
-    console.log("window.addEventListener load!");
     if (dev) console.log("moravskyprekladac.web showed in action!");   
     handlerMessages();
 
@@ -103,6 +102,7 @@ function getSettings() {
             url: document.location.toString(),
         }
     });
+    if (document.location.toString()==undefined) console.warn("setting_get_content url undefined"); 
     console.log("Send request of setting");
 }
 

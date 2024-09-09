@@ -1,3 +1,3 @@
-# Soubor /data/v3.trw_a
-- Jedná se o zabalíčkovaný soubor mnoha jazykových dat vytvořený v programu TranslatorWritter (https://github.com/GeftGames/TranslatorWritter/).
-- Obsahuje textové útržky slov, které se používají k překladům webů.
+Soubor /data/v3.json
+Jedná se o zabalíčkovaný soubor mnoha jazykových dat vytvořený v programu TranslatorWritter (https://github.com/GeftGames/TranslatorWritter/).
+Obsahuje textové útržky slov, které se používají k překladům webů.

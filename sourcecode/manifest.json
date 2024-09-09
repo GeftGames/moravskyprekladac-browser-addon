@@ -3,11 +3,13 @@
   "name": "Translate to moravian",
   "description": "Translating webpages into maravian language",
   "author": "GeftGames",
-  "version": "1.0",
+  "version": "1.3",
   "action": {
     "default_popup": "popup.html",
     "default_icon": "data/images/icon64.png"
   },
+	"homepage_url": "https://github.com/GeftGames/moravskyprekladac.web/",
+  "minimum_chrome_version": "121",
   "icons": {
     "16": "data/images/icon16.png",
     "64": "data/images/icon64.png",
@@ -70,7 +72,8 @@
   
   "browser_specific_settings": {
 	  "gecko": {
-		  "id": "@geftgames.browser_extension.moravskyprekladac.web_translate"
+		  "id": "@geftgames.browser_extension.moravskyprekladac.web_translate",
+      "strict_min_version": "121.0"
 	  }
 	}
 }

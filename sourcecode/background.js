@@ -18,6 +18,7 @@ if (isFirefox) {
 
 // Keep running! otherwise loading again and again whole translations, thats it's slow
 // Code on service worker
+/* not working
 const pingInterval = setInterval(() => {
     chrome.tabs.query(filter, function (tabs) {
         tabs.forEach(tab => {
@@ -25,6 +26,7 @@ const pingInterval = setInterval(() => {
         });
     });
   }, 10000); // Ping every 10 seconds
+*/
 
 var langArrEleOptions={items:[]};
 var progressLoading=0;
@@ -57,12 +59,17 @@ var
 //#region Main events
 // activeted
 self.addEventListener('activate', event => {
-    console.log("activating");
+    if (dev)console.log("activating");
     if (loadedLangs==-1) {
         LoadSettings();
         LoadPageRules();
         translator_init();
     }
+});
+
+// unloading
+chrome.runtime.onSuspend.addListener(function() {
+    if (dev)console.log("Unloading...");
 });
 
 // get messages
@@ -102,7 +109,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                 }
             } 
             if (command=="setting_get_content"){
-                SendContentSetting();
+                SendContentSetting(data.url);
             }            
             if (command=="pagerule_set") {
                 if (activated){
@@ -116,6 +123,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             if (command=="translate_simpleDimpleAll" || command == "translate_textNodeId") {
                 if (activated) {
                     if (loadedLangs==1) {
+                        if (data.url==undefined) consolw.warn("data.url is undefined");
                         let rule=GetCurrentPageRule(data.url);
                         if (rule || (rule==undefined && defaultRule)) {
                             if (command == "translate_simpleDimpleAll"){
@@ -157,10 +165,9 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     let getSelectedText = function () {
         return window.getSelection().toString();
     }
-    //console.log(activated,mouseContext);
     if (activated) {
         if (mouseContext){
-            console.log(info.menuItemId);
+            //console.log(info.menuItemId);
             if (info.menuItemId === 'TCS') {
                 chrome.scripting.executeScript({
                     target: { tabId: tab.id },
@@ -234,7 +241,6 @@ function LoadSettings() {
     if (dev) console.log("Loading settings");
     
     chrome.storage.local.get('Settings', function(result) {
-        console.log("Settings loaded", result);
         if (result.Settings) {
             let json=JSON.parse(result.Settings);
             LoadJsonSettings(json);            
@@ -268,6 +274,7 @@ function LoadPageRules() {
 
 // send content settings
 function SendContentSetting(url, all) {    
+    if (dev && url==undefined) console.warn("url is undefined");
     let json={ 
         command: "settings_cnt",
         sender: "background",
@@ -282,6 +289,7 @@ function SendContentSetting(url, all) {
             TranslateOnlyCSSites: translateOnlyCSSites
         }
     };
+
 
     if (dev)console.log("sending setting to content", json);
     
@@ -298,11 +306,14 @@ function SendContentSetting(url, all) {
 
 //#region Page rules
 function GetCurrentPageRule(url) {
+    if (dev && url==undefined) console.warn("function 'GetCurrentPageRule' has unknown url!");
     for (let rule of pageRules) {
         if (rule.Url==url) {
+          //  console.log("pageRules", pageRules, "url", url, "rule",rule);
             return rule.Rule;
         }
     }
+   // console.log("pageRules", pageRules, "url", url, "no");
     return null;
 }
 
@@ -331,7 +342,7 @@ function SendPageRule(){
     chrome.tabs.query({active:true,currentWindow:true}, function(tab){
         //Be aware that `tab` is an array of Tabs 
         let currentUrl=tab[0].url;
-        
+        if (currentUrl==undefined) consolw.warn("currentUrl is undefined");
         chrome.runtime.sendMessage({
             command: "pagerule",
             sender: "background",
@@ -342,7 +353,8 @@ function SendPageRule(){
                 //  domainRule: GetCurrentDomainRule(currentUrl.origin)
             },
         });
-        console.log("send pagerule", currentUrl, GetCurrentPageRule(currentUrl));
+
+      //  console.log("send pagerule", currentUrl, GetCurrentPageRule(currentUrl));
     });
 }
 //#endregion
@@ -391,7 +403,6 @@ function SendSettings() {
     json.Langs=langArrEleOptions;
     json.LanguagesList=[];
     for (let l of languagesList) {
-        console.log(l.gpsX);
         if (!isNaN(l.locationX)) json.LanguagesList.push({Name: l.Name, locationX: l.locationX, locationY: l.locationY, Quality: l.Quality, id: l.id, ColorFillStyle: l.ColorFillStyle, ColorStrokeStyle: l.ColorStrokeStyle});
     }
     chrome.runtime.sendMessage({
@@ -528,3 +539,72 @@ function SendMessageToContent(tabUrl, command, data) {
         if (dev) console.error("Couldn't find tag of url ", url);     
     });
 }
+
+/*
+function TestSaveObject(){
+    let input=languagesList[0];
+    console.log("input: ", input);
+
+    let saved=SaveObject(input);
+    console.log("saved: ", saved);
+
+    let loaded=LoadObject(saved);
+    console.log("loaded", loaded);
+}
+
+function SaveObject(obj) {
+    // Prototype
+    if (typeof obj == "number" || typeof obj == "string" || typeof obj == "boolean" || typeof obj == "undefined") return obj;
+
+    // Array
+    else if (Array.isArray(obj)) {
+        let json=[];
+        for (let i of obj) {            
+            json.push(SaveObject(i));
+        }
+        return json;
+
+    } else if (obj==null) {
+        return null;
+    
+    // my class
+    } else {
+        console.log(obj.constructor.name);
+        let saveData={};
+        saveData.Type=obj.constructor.name;
+        console.log(Object.keys(obj));
+        for (let i of Object.keys(obj)){
+            saveData[i]=SaveObject(obj[i]);
+        }
+
+        return saveData;
+    }
+    return null;
+}
+
+function LoadObject(json) {
+    // Prototype
+    if (typeof json == "number" || typeof json == "string" || typeof json == "boolean" || typeof json == "undefined") return json;
+
+    // Array
+    else if (Array.isArray(json)){
+        let obj=[];
+        for (let i of json) {            
+            obj.push(LoadObject(i));
+        }
+
+    // my class
+    } else {
+        console.log(json.Type);
+        let obj=new this[json.Type]();
+        
+        for (let key of json){
+            if (key!="Type"){
+                obj[key]=LoadObject(json[key]);
+            }
+        }
+
+        return obj;
+    }
+    return null;
+}*/
