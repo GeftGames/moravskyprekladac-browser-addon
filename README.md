@@ -1,4 +1,4 @@
-# Doplněk Moravského překladače pro Web
+# Doplněk Moravského překladače do prohlížeče
 ## Jak vyzkoušet překladač pro web?
 ### Ze storu
 - [Firefox Browser Add-ons](https://addons.mozilla.org/en-US/firefox/addon/moravsk%C3%BD-p%C5%99eklada%C4%8D-pro-web/)
